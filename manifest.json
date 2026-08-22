@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "Network Decoder — Marketing Network Debugger",
+  "short_name": "Network Decoder",
+  "version": "1.5.0",
+  "description": "Decode GA4, Google Ads, Meta, TikTok & Microsoft Clarity tracking requests in a clean sidebar. QA hints for duplicates, missing and inconsistent parameters — all local.",
+  "minimum_chrome_version": "116",
+  "permissions": ["webRequest", "sidePanel", "storage", "unlimitedStorage", "alarms"],
+  "host_permissions": [
+    "*://*.google-analytics.com/*",
+    "*://*.googletagmanager.com/*",
+    "*://*.googleadservices.com/*",
+    "*://*.doubleclick.net/*",
+    "*://adservice.google.com/*",
+    "*://*.facebook.com/tr*",
+    "*://*.facebook.net/tr*",
+    "*://connect.facebook.net/signals/*",
+    "*://analytics.tiktok.com/api/v2/pixel/*",
+    "*://analytics.tiktok.com/i18n/pixel/*",
+    "*://*.clarity.ms/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-main.js"],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": true
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-relay.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "options_page": "options.html",
+  "action": {
+    "default_title": "Open Network Decoder"
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
+}
