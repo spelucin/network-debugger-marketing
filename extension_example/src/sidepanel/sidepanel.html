@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Watcher</title>
+  <script src="../panel/theme-bootstrap.js"></script>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <img src="/icons/icon-48.png" alt="" class="header-logo" id="owlLogo" title="Try clicking me!">
+        <div>
+          <h1 class="header-title">Event Watcher</h1>
+          <span class="header-domain" id="siteDomain"></span>
+        </div>
+      </div>
+      <div class="header-actions">
+      <button class="icon-btn" id="toolsBtn" title="Categories & Tools" aria-label="Categories & Tools">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="reportToolBtn" title="Send feedback" aria-label="Send feedback">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="helpBtn" title="Help" aria-label="Help">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+          <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="viewModeBtn" title="Switch to popup view" aria-label="Switch to popup view">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+        </svg>
+      </button>
+      <button class="icon-btn" id="settingsBtn" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+      </div>
+    </header>
+
+    <!-- DevTools promo banner -->
+    <div class="devtools-banner" id="devtoolsBanner" data-variant="default">
+      <div class="devtools-banner-row">
+        <div class="devtools-banner-content">
+          <svg class="devtools-banner-icon" data-variant-icon="default" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <svg class="devtools-banner-icon" data-variant-icon="version" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+            <path d="M12 3l1.6 4.6L18 9l-4.4 1.4L12 15l-1.6-4.6L6 9l4.4-1.4L12 3z"></path>
+            <path d="M19 14l.6 1.6L21 16l-1.4.4L19 18l-.6-1.6L17 16l1.4-.4L19 14z"></path>
+            <path d="M5 5l.6 1.6L7 7l-1.4.4L5 9l-.6-1.6L3 7l1.4-.4L5 5z"></path>
+          </svg>
+          <div class="devtools-banner-copy">
+            <span class="devtools-banner-text" id="devtoolsBannerText">Open Developer Tools for all features</span>
+            <span class="devtools-banner-hint" id="devtoolsBannerHint">Live event stream with full details and more</span>
+            <button type="button" class="devtools-banner-action" id="devtoolsBannerAction">See how</button>
+          </div>
+        </div>
+        <button class="devtools-banner-close" id="closeBanner" title="Dismiss" aria-label="Dismiss">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="devtools-banner-expansion" id="devtoolsBannerExpansion" aria-hidden="true">
+        <ol class="devtools-steps">
+          <li class="devtools-step">
+            <div class="devtools-step-body">
+              <p class="devtools-step-text">Press <kbd>F12</kbd> or <kbd id="devtoolsStepShortcut">Ctrl+Shift+I</kbd>, or right-click the page and choose <strong>Inspect</strong>.</p>
+            </div>
+          </li>
+          <li class="devtools-step">
+            <div class="devtools-step-body">
+              <p class="devtools-step-text">Find the <strong>Event Watcher</strong> tab in the DevTools tab bar. If it&rsquo;s hidden, click the overflow (<kbd>&raquo;</kbd> in Chrome, <kbd>+</kbd> in Edge).</p>
+              <img class="devtools-step-screenshot" id="devtoolsStepScreenshot" src="../../assets/devtools-tab-chrome.png" alt="DevTools tab bar showing where to find the Event Watcher tab" width="180">
+              <p class="devtools-step-note" id="devtoolsStepNote" hidden></p>
+            </div>
+          </li>
+          <li class="devtools-step">
+            <div class="devtools-step-body">
+              <p class="devtools-step-text">Keep DevTools open while you browse - events stream live as the page fires them.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Capture Status Bar (shown when paused or stopped) -->
+    <div class="capture-status-bar" id="sp-capture-status-bar" data-state="play">
+      <svg class="capture-status-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+      </svg>
+      <span class="capture-status-text" id="sp-capture-status-text">Capturing events...</span>
+    </div>
+
+    <!-- Search + Capture Controls (combined row) -->
+    <div class="search-bar">
+      <div class="capture-controls" id="captureControls">
+        <button type="button" class="capture-ctrl-btn clear-btn" id="sp-clear-btn" title="Clear all detected tools" aria-label="Clear all detected tools">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+          </svg>
+        </button>
+        <button type="button" class="capture-ctrl-btn capture-btn" id="sp-capture-btn" data-state="play" title="Capturing events (click to pause)" aria-label="Capturing events (click to pause)">
+          <svg class="capture-icon capture-icon-play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+            <circle cx="12" cy="12" r="5" fill="currentColor"/>
+          </svg>
+          <svg class="capture-icon capture-icon-pause" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="6" y="4" width="4" height="16" rx="1"/>
+            <rect x="14" y="4" width="4" height="16" rx="1"/>
+          </svg>
+          <svg class="capture-icon capture-icon-stop" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="6" y="6" width="12" height="12" rx="2"/>
+          </svg>
+        </button>
+      </div>
+      <div class="search-input-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="searchInput" placeholder="Search tools..." autocomplete="off">
+      </div>
+    </div>
+
+    <!-- Toolbar: summary + sort tabs -->
+    <div class="toolbar">
+      <span class="summary" id="summary"></span>
+      <div class="sort-tabs" id="sortTabs">
+        <button class="sort-tab active" data-sort="category" title="Group by category">Category</button>
+        <button class="sort-tab" data-sort="alpha" title="Sort alphabetically">A–Z</button>
+        <button class="sort-tab" data-sort="count" title="Sort by request count" aria-label="Sort by request count">#</button>
+      </div>
+    </div>
+
+    <!-- Tool list -->
+    <div class="tool-list" id="toolList"></div>
+
+    <!-- Empty state -->
+    <div class="empty-state" id="emptyState" style="display: none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M8 15h8M9 9h.01M15 9h.01"></path>
+      </svg>
+      <p>No tracking tools detected yet</p>
+      <span>Navigate to a website to see detected tools</span>
+    </div>
+
+    <!-- Reload hint (shown when few tools detected) -->
+    <div class="reload-hint" id="reloadHint" style="display: none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+        <path d="M1 4v6h6M23 20v-6h-6"></path>
+        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+      </svg>
+      <span>Opened mid-session? <a href="#" id="reloadLink">Reload page</a> to capture all tools</span>
+    </div>
+
+    <!-- Performance Status Footer -->
+    <footer class="status-footer" id="status-footer">
+      <div class="status-footer-content">
+        <span class="perf-indicator" id="perf-indicator">
+          <span class="perf-dot"></span>
+          <span id="perf-stats">--</span>
+        </span>
+      </div>
+      <button type="button" class="footer-copy-btn" id="sp-footer-copy-btn" title="Copy debug data to clipboard" aria-label="Copy debug data to clipboard">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+      </button>
+    </footer>
+  </div>
+
+  <!-- Settings overlay -->
+  <div class="settings-overlay" id="settingsOverlay" style="display: none;">
+    <div class="settings-panel">
+      <div class="settings-header">
+        <h2>Settings</h2>
+        <button class="icon-btn" id="closeSettings" title="Close" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="settings-body">
+        <div class="setting-group">
+          <label class="setting-label">Theme</label>
+          <div class="setting-row">
+            <select id="themeSetting" class="setting-select">
+              <option value="system">System</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label class="setting-label">Card Size</label>
+          <div class="setting-row">
+            <select id="cardSizeSetting" class="setting-select">
+              <option value="default">Default</option>
+              <option value="compact">Compact</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label class="setting-label">Default Sort</label>
+          <div class="setting-row">
+            <select id="sortSetting" class="setting-select">
+              <option value="category">By Category</option>
+              <option value="alpha">Alphabetical</option>
+              <option value="count">By Request Count</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label class="setting-label">Default View</label>
+          <div class="setting-row">
+            <select id="viewModeSetting" class="setting-select">
+              <option value="sidepanel">Side Panel</option>
+              <option value="popup">Popup</option>
+            </select>
+          </div>
+        </div>
+        <!-- Debug Settings -->
+        <div class="setting-group setting-group-divider">
+          <label class="setting-label">Debug</label>
+          <div class="setting-row setting-row-toggle">
+            <span class="setting-toggle-info">
+              <span class="setting-toggle-name">Extended debug export</span>
+              <span class="setting-toggle-desc">Show copy button in footer to export detection data for troubleshooting</span>
+            </span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="debugModeSetting">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help overlay -->
+  <div class="overlay" id="helpOverlay" style="display: none;">
+    <div class="overlay-panel">
+      <div class="overlay-header">
+        <h2>Help</h2>
+        <button type="button" class="icon-btn" id="closeHelp" title="Close" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="overlay-body">
+        <div class="help-section">
+          <h3>What is Event Watcher?</h3>
+          <p>Event Watcher captures and displays analytics and marketing tracking events in real-time as you browse. It detects 500+ platforms including Google Analytics, Meta Pixel, Adobe Analytics, and more.</p>
+        </div>
+        <div class="help-section">
+          <h3>Side Panel vs DevTools</h3>
+          <p id="helpDevtoolsHint">This Side Panel shows a quick overview of detected tracking tools grouped by category. For detailed event-by-event analysis, open DevTools (<kbd>F12</kbd>) and click the Event Watcher tab.</p>
+        </div>
+        <div class="help-section">
+          <h3>Reading the Tool List</h3>
+          <ul>
+            <li><strong>Tool icon & name</strong> &mdash; The tracking platform detected</li>
+            <li><strong>Request count</strong> &mdash; Number of requests sent by this tool</li>
+            <li><strong>Category headers</strong> &mdash; Click to expand/collapse groups</li>
+          </ul>
+        </div>
+        <div class="help-section">
+          <h3>Sorting Options</h3>
+          <ul>
+            <li><strong>Category</strong> &mdash; Group tools by type (Analytics, Marketing, etc.)</li>
+            <li><strong>A-Z</strong> &mdash; Alphabetical list of all tools</li>
+            <li><strong>#</strong> &mdash; Sort by request count (most active first)</li>
+          </ul>
+        </div>
+        <div class="help-section">
+          <h3>Controls</h3>
+          <ul>
+            <li><strong>Search</strong> &mdash; Filter detected tools by name</li>
+            <li><strong>Capture</strong> &mdash; Pause or stop event capture, or clear all detected tools</li>
+            <li><strong>Categories &amp; Tools</strong> &mdash; Browse all 500+ supported platforms</li>
+            <li><strong>Settings</strong> &mdash; Theme, card size, default sort, and view mode preferences</li>
+            <li><strong>Feedback</strong> &mdash; Report bugs, request features, or suggest missing tools</li>
+          </ul>
+        </div>
+        <div class="help-section help-about">
+          <h4>About</h4>
+          <p>Created by <strong>Rune Andersen</strong></p>
+          <p class="help-links">
+            <a href="https://www.linkedin.com/in/runeandersendk/" target="_blank" rel="noopener">LinkedIn</a>
+            <a href="https://github.com/rune-andersen" target="_blank" rel="noopener">GitHub</a>
+            <a href="https://eventwatcher.dev/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Categories & Tools overlay -->
+  <div class="overlay" id="toolsOverlay" style="display: none;">
+    <div class="overlay-panel">
+      <div class="overlay-header">
+        <h2>Categories & Tools</h2>
+        <button type="button" class="icon-btn" id="closeTools" title="Close" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="overlay-toolbar">
+        <input type="search" id="toolsSearch" class="overlay-search" placeholder="Search tools..." autocomplete="off">
+        <div class="view-toggle" id="toolsViewToggle">
+          <button type="button" class="view-toggle-btn active" data-view="grouped" title="By Category">Category</button>
+          <button type="button" class="view-toggle-btn" data-view="list" title="Alphabetical">A-Z</button>
+        </div>
+      </div>
+      <div class="overlay-body" id="toolsListBody">
+        <!-- Tools list inserted by JS -->
+      </div>
+      <div class="overlay-footer">
+        <span id="toolsCount">500+ tools supported</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report/Feedback overlay (multi-purpose: feedback, feature, bug, tool) -->
+  <div class="overlay" id="reportModalOverlay" style="display: none;">
+    <div class="overlay-panel">
+      <div class="overlay-header">
+        <h2 id="sp-report-modal-title">
+          <span class="sp-report-modal-icon" id="sp-report-modal-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </span>
+          <span id="sp-report-modal-title-text">Send Feedback</span>
+        </h2>
+        <button type="button" class="icon-btn" id="closeReportModal" title="Close" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="overlay-body">
+        <!-- Step 1: Type Selection Cards (initial view) -->
+        <div class="sp-report-type-cards" id="sp-report-type-cards">
+          <button type="button" class="sp-report-type-card" data-type="feedback">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <div class="sp-report-type-card-content">
+              <span class="sp-report-type-card-title">General Feedback</span>
+              <span class="sp-report-type-card-desc">Share thoughts, suggestions, or tell us what you like</span>
+            </div>
+          </button>
+          <button type="button" class="sp-report-type-card" data-type="feature">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/>
+            </svg>
+            <div class="sp-report-type-card-content">
+              <span class="sp-report-type-card-title">Feature Request</span>
+              <span class="sp-report-type-card-desc">Suggest a new feature or improvement</span>
+            </div>
+          </button>
+          <button type="button" class="sp-report-type-card" data-type="bug">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 2l1.88 1.88M14.12 3.88L16 2M9 7.13v-1a3 3 0 1 1 6 0v1"/>
+              <path d="M12 20c-3.3 0-6-2.7-6-6v-3a6 6 0 0 1 12 0v3c0 3.3-2.7 6-6 6z"/>
+              <path d="M12 20v2M6 13H2M6 17H2M22 13h-4M22 17h-4"/>
+            </svg>
+            <div class="sp-report-type-card-content">
+              <span class="sp-report-type-card-title">Report a Bug</span>
+              <span class="sp-report-type-card-desc">Something broken or not working as expected</span>
+            </div>
+          </button>
+          <button type="button" class="sp-report-type-card" data-type="tool">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+              <path d="M11 8v6M8 11h6"/>
+            </svg>
+            <div class="sp-report-type-card-content">
+              <span class="sp-report-type-card-title">Missing Tool</span>
+              <span class="sp-report-type-card-desc">Report a tracking tool we should add or fix</span>
+            </div>
+          </button>
+        </div>
+
+        <!-- Step 2: Form (hidden until type is selected) -->
+        <div class="sp-report-form-container" id="sp-report-form-container">
+          <!-- Type Selector Bar -->
+          <div class="sp-report-type-selector" id="sp-report-type-selector">
+            <button type="button" class="sp-report-type-btn" data-type="feedback">Feedback</button>
+            <button type="button" class="sp-report-type-btn" data-type="feature">Feature</button>
+            <button type="button" class="sp-report-type-btn" data-type="bug">Bug</button>
+            <button type="button" class="sp-report-type-btn" data-type="tool">Missing Tool</button>
+          </div>
+
+          <p class="report-tool-desc" id="sp-report-modal-desc">Share your thoughts about Event Watcher. We read every piece of feedback.</p>
+
+          <form id="sp-report-modal-form" class="report-tool-form">
+            <!-- Feedback Fields -->
+            <div class="sp-report-fields" id="sp-report-fields-feedback">
+              <div class="report-tool-field">
+                <label for="sp-report-feedback-subject">Subject <span class="report-tool-required">*</span></label>
+                <input type="text" id="sp-report-feedback-subject" placeholder="What's on your mind?">
+              </div>
+              <div class="report-tool-field">
+                <label for="sp-report-feedback-comment">Feedback <span class="report-tool-required">*</span></label>
+                <textarea id="sp-report-feedback-comment" rows="4" placeholder="Tell us more..."></textarea>
+              </div>
+            </div>
+
+            <!-- Feature Request Fields -->
+            <div class="sp-report-fields" id="sp-report-fields-feature" style="display: none;">
+              <div class="report-tool-field">
+                <label for="sp-report-feature-subject">Feature name <span class="report-tool-required">*</span></label>
+                <input type="text" id="sp-report-feature-subject" placeholder="e.g. Export to CSV, Dark mode...">
+              </div>
+              <div class="report-tool-field">
+                <label for="sp-report-feature-comment">Description <span class="report-tool-required">*</span></label>
+                <textarea id="sp-report-feature-comment" rows="3" placeholder="Describe the feature..."></textarea>
+              </div>
+              <div class="report-tool-field">
+                <label for="sp-report-feature-why">Why is this needed?</label>
+                <textarea id="sp-report-feature-why" rows="2" placeholder="What problem would this solve for you?"></textarea>
+              </div>
+            </div>
+
+            <!-- Bug Report Fields -->
+            <div class="sp-report-fields" id="sp-report-fields-bug" style="display: none;">
+              <div class="report-tool-field">
+                <label for="sp-report-bug-subject">Bug summary <span class="report-tool-required">*</span></label>
+                <input type="text" id="sp-report-bug-subject" placeholder="Brief description of the issue">
+              </div>
+              <div class="report-tool-field">
+                <label for="sp-report-bug-website">Website where you saw it</label>
+                <input type="text" id="sp-report-bug-website" placeholder="e.g. example.com (optional)">
+              </div>
+              <div class="report-tool-field">
+                <label for="sp-report-bug-comment">Details <span class="report-tool-required">*</span></label>
+                <textarea id="sp-report-bug-comment" rows="4" placeholder="Steps to reproduce, expected vs actual behavior..."></textarea>
+              </div>
+            </div>
+
+            <!-- Missing Tool Fields -->
+            <div class="sp-report-fields" id="sp-report-fields-tool" style="display: none;">
+              <div class="report-tool-field">
+                <label for="sp-report-tool-subject">Tool / Platform name <span class="report-tool-required">*</span></label>
+                <input type="text" id="sp-report-tool-subject" placeholder="e.g. Mixpanel, Snowplow, custom endpoint...">
+              </div>
+              <div class="report-tool-field">
+                <label for="sp-report-tool-category">Category</label>
+                <select id="sp-report-tool-category" class="report-tool-select">
+                  <option value="">— Select a category —</option>
+                  <option value="data-layer">Data Layer</option>
+                  <option value="tag-manager">Tag Managers</option>
+                  <option value="first-party-collection">1st Party Collection</option>
+                  <option value="analytics">Analytics</option>
+                  <option value="cdp">Customer Data Platforms</option>
+                  <option value="ab-testing">A/B Testing</option>
+                  <option value="advertising">Advertising</option>
+                  <option value="marketing-automation">Marketing Automation</option>
+                  <option value="ad-tech">Ad Tech</option>
+                  <option value="session-replay">Session Replay</option>
+                  <option value="video">Video Analytics</option>
+                  <option value="consent">Consent Platforms</option>
+                  <option value="widgets">Widgets</option>
+                  <option value="monitoring">Monitoring</option>
+                </select>
+              </div>
+              <div class="report-tool-field">
+                <label for="sp-report-tool-website">Website where you saw it</label>
+                <input type="text" id="sp-report-tool-website" placeholder="e.g. example.com">
+              </div>
+              <div class="report-tool-field">
+                <label for="sp-report-tool-endpoint">Endpoint pattern or URL</label>
+                <input type="text" id="sp-report-tool-endpoint" placeholder="e.g. /collect, analytics.example.com/v2/track">
+              </div>
+              <div class="report-tool-field">
+                <label for="sp-report-tool-comment">Comments</label>
+                <textarea id="sp-report-tool-comment" rows="2" placeholder="Any additional details..."></textarea>
+              </div>
+            </div>
+
+            <!-- Contact Info (shared) -->
+            <div class="sp-report-contact-section">
+              <div class="sp-report-contact-header">Contact info (optional)</div>
+              <div class="sp-report-contact-fields">
+                <div class="report-tool-field">
+                  <input type="text" id="sp-report-contact-name" placeholder="Name">
+                </div>
+                <div class="report-tool-field">
+                  <input type="email" id="sp-report-contact-email" placeholder="Email">
+                </div>
+              </div>
+            </div>
+
+            <div class="report-tool-actions">
+              <button type="submit" class="report-tool-submit-btn">Submit</button>
+              <span class="report-tool-privacy">Anonymous unless you add contact info</span>
+            </div>
+          </form>
+        </div>
+
+        <!-- Success message -->
+        <div class="report-tool-success" id="sp-report-modal-success">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+            <path d="M22 4L12 14.01l-3-3"/>
+          </svg>
+          <p>Thanks! We'll review your submission.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
+
+  <script type="module" src="sidepanel.js"></script>
+</body>
+</html>
