@@ -1,14 +1,13 @@
-import { ChevronDown, Search, X } from "lucide-react";
+import { ChevronDown, History, Layers, Search, X } from "lucide-react";
 import type { MarketingRequest } from "../../core/types";
 import { PLATFORM_INFO } from "../../core/types";
 import {
   collectEvents,
   countByPlatform,
-  countByQa,
   type FilterState,
   type PlatformFilter,
-  type QaFilter,
 } from "../lib/filters";
+import type { ListView } from "./RequestList";
 
 interface Props {
   filters: FilterState;
@@ -16,6 +15,8 @@ interface Props {
   captureEnabled: boolean;
   onToggleCapture: () => void;
   onFiltersChange: (filters: FilterState) => void;
+  view: ListView;
+  onViewChange: (view: ListView) => void;
 }
 
 const PLATFORM_TABS: Array<{ id: PlatformFilter; label: string }> = [
@@ -27,20 +28,47 @@ const PLATFORM_TABS: Array<{ id: PlatformFilter; label: string }> = [
   { id: "clarity", label: PLATFORM_INFO.clarity.shortLabel },
 ];
 
-const QA_TABS: Array<{ id: QaFilter; label: string }> = [
-  { id: "all", label: "All" },
-  { id: "issues", label: "Issues" },
-  { id: "warnings", label: "Warnings" },
-  { id: "clean", label: "Clean" },
+const VIEW_TABS: Array<{ id: ListView; label: string; icon: typeof Layers }> = [
+  { id: "grouped", label: "Platforms", icon: Layers },
+  { id: "history", label: "History", icon: History },
 ];
 
-export function FilterBar({ filters, requests, captureEnabled, onToggleCapture, onFiltersChange }: Props) {
+export function FilterBar({
+  filters,
+  requests,
+  captureEnabled,
+  onToggleCapture,
+  onFiltersChange,
+  view,
+  onViewChange,
+}: Props) {
   const counts = countByPlatform(requests);
-  const qaCounts = countByQa(requests);
   const events = collectEvents(requests);
 
   return (
     <div className="filter-bar">
+      <div className="capture-row">
+        <button
+          type="button"
+          className={`capture-toggle ${captureEnabled ? "on" : "off"}`}
+          onClick={onToggleCapture}
+          aria-pressed={captureEnabled}
+          title={
+            captureEnabled
+              ? "Capture is on — every matching request is intercepted and decoded. Click to pause."
+              : "Capture is paused — requests are not intercepted. Click to resume."
+          }
+        >
+          <span className={`capture-dot ${captureEnabled ? "on" : "off"}`} />
+          Capture
+        </button>
+        <span className="capture-hint">
+          {captureEnabled
+            ? "Watches traffic live — the list resets on navigation unless recording is on."
+            : "Paused — no requests are being intercepted."}
+        </span>
+      </div>
+
       <div className="search-row">
         <div className="search-box">
           <Search size={13} className="search-icon" />
@@ -63,20 +91,6 @@ export function FilterBar({ filters, requests, captureEnabled, onToggleCapture, 
             </button>
           )}
         </div>
-        <button
-          type="button"
-          className={`capture-toggle ${captureEnabled ? "on" : "off"}`}
-          onClick={onToggleCapture}
-          aria-pressed={captureEnabled}
-          title={
-            captureEnabled
-              ? "Capture is on — every matching request is stored. Click to pause."
-              : "Capture is paused — requests are not intercepted. Click to resume."
-          }
-        >
-          <span className={`capture-dot ${captureEnabled ? "on" : "off"}`} />
-          Capture
-        </button>
       </div>
 
       <div className="tab-row">
@@ -93,26 +107,27 @@ export function FilterBar({ filters, requests, captureEnabled, onToggleCapture, 
         ))}
       </div>
 
-      <div className="tab-row tab-row-qa">
-        <div className="segmented" role="group" aria-label="QA filter">
-          {QA_TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              className={`seg-btn ${filters.qa === tab.id ? "active" : ""}`}
-              onClick={() => onFiltersChange({ ...filters, qa: tab.id })}
-              title={
-                tab.id === "issues"
-                  ? "Requests with warnings (duplicates, missing, suspicious, inconsistent)"
-                  : tab.id === "warnings"
-                    ? "Requests with informational notices"
-                    : "Requests with no QA flags"
-              }
-            >
-              {tab.label}
-              <span className="seg-count">{qaCounts[tab.id]}</span>
-            </button>
-          ))}
+      <div className="tab-row tab-row-options">
+        <div className="segmented view-toggle" role="group" aria-label="List layout">
+          {VIEW_TABS.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                className={`seg-btn ${view === tab.id ? "active" : ""}`}
+                onClick={() => onViewChange(tab.id)}
+                title={
+                  tab.id === "grouped"
+                    ? "Group requests by platform, most recently active first."
+                    : "Flat chronological list across all platforms."
+                }
+              >
+                <Icon size={11} />
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
         <div className="event-select-wrap">
           <select

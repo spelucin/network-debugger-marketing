@@ -2,16 +2,18 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCapture } from "./hooks/useCapture";
 import { Header } from "./components/Header";
 import { FilterBar } from "./components/FilterBar";
-import { RequestList } from "./components/RequestList";
+import { RequestList, type ListView } from "./components/RequestList";
 import { Detail } from "./components/Detail";
 import { SettingsOverlay } from "./components/SettingsOverlay";
 import { EmptyState } from "./components/EmptyState";
+import { StatsFooter } from "./components/StatsFooter";
 import { DEFAULT_FILTERS, filterByTab, filterRequests, type FilterState } from "./lib/filters";
 
 export function App() {
   const {
     requests,
     settings,
+    stats,
     captureEnabled,
     recordThisTab,
     recordAllTabs,
@@ -127,9 +129,11 @@ export function App() {
           <FilterBar
             filters={filters}
             requests={visibleRequests}
-            onFiltersChange={setFilters}
             captureEnabled={captureEnabled}
             onToggleCapture={() => setCapturing(!captureEnabled)}
+            onFiltersChange={setFilters}
+            view={settings.listView}
+            onViewChange={(view: ListView) => updateSettings({ listView: view })}
           />
           {visibleRequests.length === 0 ? (
             <EmptyState
@@ -138,11 +142,15 @@ export function App() {
               onStart={() => setCapturing(true)}
             />
           ) : (
-            <RequestList
-              requests={filtered}
-              selectedId={selectedId}
-              onSelect={setSelectedId}
-            />
+            <>
+              <RequestList
+                requests={filtered}
+                view={settings.listView}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+              />
+              <StatsFooter perf={stats.perf} />
+            </>
           )}
         </>
       ) : (

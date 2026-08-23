@@ -26,7 +26,7 @@ export function EmptyState({ captureEnabled, recording, onStart }: Props) {
         {captureEnabled
           ? recording
             ? "Nothing captured so far. If you opened the panel after the page loaded, reload this page (refresh button above) to capture all requests from page load."
-            : "The view starts fresh on every navigation. If you opened the panel mid-session, reload this page (refresh button above) to capture all requests from page load. GA4, Google Ads, Meta, TikTok and Clarity requests will appear here."
+            : "Capture-only mode: the view starts fresh on every navigation. Turn on a recording scope (This tab / All tabs) to keep history, or reload this page (refresh button above) to capture from page load."
           : "Turn capture on to start intercepting marketing requests."}
       </div>
       {!captureEnabled && (

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Download,
   RotateCw,
@@ -22,12 +22,6 @@ interface Props {
   onRefreshTab: () => void;
 }
 
-function formatAge(seconds: number): string {
-  if (seconds < 60) return `${seconds}s`;
-  const m = Math.floor(seconds / 60);
-  return `${m}m`;
-}
-
 export function Header({
   requests,
   captureEnabled,
@@ -40,23 +34,10 @@ export function Header({
   onRefreshTab,
 }: Props) {
   const [exportOpen, setExportOpen] = useState(false);
-  const [now, setNow] = useState(() => Date.now());
   const menuRef = useRef<HTMLDivElement>(null);
 
   const count = requests.length;
   const stamp = useMemo(() => new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-"), []);
-
-  // One-second ticker so the "updated Xs ago" label stays fresh.
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  const newest = useMemo(() => {
-    let max = 0;
-    for (const r of requests) if (r.timestamp > max) max = r.timestamp;
-    return max;
-  }, [requests]);
 
   const statusText = !captureEnabled
     ? "capture paused"
@@ -64,9 +45,7 @@ export function Header({
       ? "recording all tabs"
       : recordThisTab
         ? "recording this tab"
-        : count === 0
-          ? "not recording"
-          : `not recording · updated ${formatAge(Math.max(0, Math.floor((now - newest) / 1000)))} ago`;
+        : "capture-only";
 
   const doExport = (kind: "json" | "csv") => {
     const stampPart = stamp;
@@ -107,6 +86,7 @@ export function Header({
       </div>
 
       <div className="header-actions">
+        <span className="record-label">Record:</span>
         <div className="segmented record-scope" role="group" aria-label="Recording scope">
           <button
             type="button"
@@ -115,8 +95,8 @@ export function Header({
             aria-pressed={recordThisTab}
             title={
               recordThisTab
-                ? "Recording this tab. Requests are kept while you stay here; switching tabs clears the view."
-                : "Record this tab only. Requests are kept for the current tab; switching tabs or navigating to a new domain clears the list."
+                ? "Recording this tab: requests from this tab are kept while you browse here. Switching to another tab clears the view."
+                : "Click to keep this tab's history across reloads. Right now (off) capture-only is active: the list resets on every navigation."
             }
           >
             This tab
@@ -128,8 +108,8 @@ export function Header({
             aria-pressed={recordAllTabs}
             title={
               recordAllTabs
-                ? "Recording all tabs. Requests from every tab and domain are kept and nothing is cleared on navigation."
-                : "Record all tabs. Keep requests from every tab and domain, across refreshes and domain changes."
+                ? "Recording all tabs: requests from every tab and site are kept until you clear them. Nothing resets on navigation."
+                : "Click to keep requests from every tab and site. Right now (off) capture-only is active: the list resets on every navigation."
             }
           >
             All tabs

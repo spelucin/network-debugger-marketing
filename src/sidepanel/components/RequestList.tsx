@@ -1,17 +1,27 @@
-import { memo } from "react";
-import type { MarketingRequest } from "../../core/types";
+import { memo, useCallback, useMemo, useState } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import type { MarketingRequest, Platform } from "../../core/types";
+import { PLATFORM_INFO } from "../../core/types";
 import { formatMoney, formatTimeShort, truncateMiddle } from "../../core/url";
-import { requestId, qaBucket } from "../lib/filters";
-import { PlatformIcon, platformDotColor } from "./PlatformIcon";
-import { useVirtualList } from "../hooks/useVirtualList";
+import { groupByPlatform, requestId } from "../lib/filters";
+import { PlatformIcon } from "./PlatformIcon";
+import { useVirtualList, type VirtualItem } from "../hooks/useVirtualList";
 
 const ROW_HEIGHT = 54;
+const GROUP_HEIGHT = 30;
+
+export type ListView = "grouped" | "history";
 
 interface Props {
   requests: MarketingRequest[];
+  view: ListView;
   selectedId: string | null;
   onSelect: (id: string) => void;
 }
+
+type ListItem =
+  | { kind: "row"; request: MarketingRequest }
+  | { kind: "group"; platform: Platform; count: number };
 
 function valueSummary(request: MarketingRequest): string | undefined {
   const e = request.decoded?.ecommerce;
@@ -28,9 +38,7 @@ function Row({
   selected: boolean;
   onSelect: (id: string) => void;
 }) {
-  const decoded = request.decoded;
   const id = requestId(request);
-  const bucket = qaBucket(request);
   const value = valueSummary(request);
 
   return (
@@ -52,36 +60,14 @@ function Row({
         <span className="row-sub">
           {request.unknown
             ? truncateMiddle(compactish(request.url), 46)
-            : `${decoded?.platform === "ga4" ? "GA4" : shortPlatform(request.platform)}${id ? ` · ${id}` : ""}`}
+            : `${PLATFORM_INFO[request.platform].shortLabel}${id ? ` · ${id}` : ""}`}
         </span>
       </span>
       <span className="row-side">
-        <span
-          className={`row-status status-${bucket}`}
-          title={
-            bucket === "issues"
-              ? "QA issues detected"
-              : bucket === "warnings"
-                ? "Notices detected"
-                : "No QA flags"
-          }
-        >
-          <span className="status-dot" style={{ background: statusColor(bucket) }} />
-        </span>
         <span className="row-time">{formatTimeShort(request.timestamp)}</span>
       </span>
     </button>
   );
-}
-
-function shortPlatform(platform: MarketingRequest["platform"]): string {
-  switch (platform) {
-    case "ga4": return "GA4";
-    case "google_ads": return "Ads";
-    case "meta": return "Meta";
-    case "tiktok": return "TikTok";
-    default: return "Unknown";
-  }
 }
 
 function compactish(url: string): string {
@@ -93,18 +79,62 @@ function compactish(url: string): string {
   }
 }
 
-function statusColor(bucket: "issues" | "warnings" | "clean"): string {
-  if (bucket === "issues") return "var(--danger)";
-  if (bucket === "warnings") return "var(--warn)";
-  return "var(--success)";
+function buildItems(
+  requests: MarketingRequest[],
+  view: ListView,
+  collapsed: ReadonlySet<Platform>
+): Array<VirtualItem & { data: ListItem }> {
+  if (view === "history") {
+    return requests.map((request) => ({
+      id: `row:${request.id}`,
+      height: ROW_HEIGHT,
+      data: { kind: "row", request },
+    }));
+  }
+
+  const items: Array<VirtualItem & { data: ListItem }> = [];
+  for (const section of groupByPlatform(requests)) {
+    items.push({
+      id: `group:${section.platform}`,
+      height: GROUP_HEIGHT,
+      data: { kind: "group", platform: section.platform, count: section.requests.length },
+    });
+    if (collapsed.has(section.platform)) continue;
+    for (const request of section.requests) {
+      items.push({
+        id: `row:${request.id}`,
+        height: ROW_HEIGHT,
+        data: { kind: "row", request },
+      });
+    }
+  }
+  return items;
 }
 
 export const RequestList = memo(function RequestList({
   requests,
+  view,
   selectedId,
   onSelect,
 }: Props) {
-  const list = useVirtualList(requests.length, ROW_HEIGHT);
+  // Accordion state: which platform groups are folded shut. Groups start
+  // expanded; collapsing only hides rows, the sticky header count remains.
+  const [collapsed, setCollapsed] = useState<ReadonlySet<Platform>>(new Set());
+
+  const toggleGroup = useCallback((platform: Platform) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(platform)) next.delete(platform);
+      else next.add(platform);
+      return next;
+    });
+  }, []);
+
+  const items = useMemo(
+    () => buildItems(requests, view, collapsed),
+    [requests, view, collapsed]
+  );
+  const list = useVirtualList(items);
 
   if (requests.length === 0) {
     return <div className="list-empty">No matching requests.</div>;
@@ -113,22 +143,41 @@ export const RequestList = memo(function RequestList({
   return (
     <div className="request-list" ref={list.containerRef} onScroll={list.onScroll}>
       <div className="list-spacer" style={{ height: list.totalHeight }}>
-        <div
-          className="list-window"
-          style={{ transform: `translateY(${list.offsetY}px)` }}
-        >
-          {requests.slice(list.start, list.end).map((r) => (
-            <Row
-              key={r.id}
-              request={r}
-              selected={r.id === selectedId}
-              onSelect={onSelect}
-            />
-          ))}
-        </div>
+        {list.visible.map(({ item, top }) => {
+          if (item.data.kind === "group") {
+            const { platform, count } = item.data;
+            const info = PLATFORM_INFO[platform];
+            const isCollapsed = collapsed.has(platform);
+            const Caret = isCollapsed ? ChevronRight : ChevronDown;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                className="group-header"
+                style={{ top, height: item.height }}
+                onClick={() => toggleGroup(platform)}
+                aria-expanded={!isCollapsed}
+                title={
+                  isCollapsed
+                    ? `Expand ${info.label} (${count} request${count === 1 ? "" : "s"})`
+                    : `Collapse ${info.label}`
+                }
+              >
+                <Caret size={11} className="group-caret" />
+                <PlatformIcon platform={item.data.platform} size={13} />
+                <span className="group-label">{info.label}</span>
+                <span className="group-count">{count}</span>
+              </button>
+            );
+          }
+          const request = item.data.request;
+          return (
+            <div key={item.id} className="list-cell" style={{ top, height: item.height }}>
+              <Row request={request} selected={request.id === selectedId} onSelect={onSelect} />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 });
-
-export { platformDotColor };

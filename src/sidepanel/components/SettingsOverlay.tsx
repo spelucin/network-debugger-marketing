@@ -53,7 +53,7 @@ export function SettingsOverlay({ settings, onUpdate, onClose }: Props) {
 
           <Setting
             label="Record"
-            hint="What the panel keeps on screen. Options are not exclusive."
+            hint="Both off = capture-only: requests stream in live, but the list resets on navigation. “This tab” keeps the current tab's history; “All tabs” keeps every tab's. They can be combined."
           >
             <div className="segmented record-scope" role="group">
               <button
@@ -124,15 +124,14 @@ export function SettingsOverlay({ settings, onUpdate, onClose }: Props) {
               server. No analytics, no telemetry, no accounts.
             </p>
             <p>
-              Everything — parsing, decoding and QA — runs locally. Requests are
+              Everything — parsing and decoding — runs locally. Requests are
               only read from the marketing domains listed above while capture is
               enabled.
             </p>
           </div>
 
           <div className="about-note">
-            Network Decoder v1.5.0 · a marketing network request decoder &amp;
-            QA companion.
+            Network Decoder v1.5.0 · a marketing network request decoder.
           </div>
         </div>
       </div>
