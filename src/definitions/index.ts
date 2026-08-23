@@ -1,13 +1,32 @@
 import type { Platform } from "../core/types";
 import { splitBracketKey } from "../core/url";
+import { AMPLITUDE_DEFINITION_MAP } from "./amplitude";
+import { BING_DEFINITION_MAP } from "./bing";
 import { GA4_DEFINITION_MAP } from "./ga4";
 import { GOOGLE_ADS_DEFINITION_MAP } from "./google-ads";
+import { HEAP_DEFINITION_MAP } from "./heap";
+import { MATOMO_DEFINITION_MAP } from "./matomo";
 import { META_DEFINITION_MAP } from "./meta";
+import { MIXPANEL_DEFINITION_MAP } from "./mixpanel";
+import { PINTEREST_DEFINITION_MAP } from "./pinterest";
 import { TIKTOK_DEFINITION_MAP } from "./tiktok";
+import { CRITEO_DEFINITION_MAP, CRITEO_DOCS } from "./criteo";
+import { HUBSPOT_DEFINITION_MAP, HUBSPOT_DOCS } from "./hubspot";
+import { LINKEDIN_DEFINITION_MAP, LINKEDIN_DOCS } from "./linkedin";
+import { SNAPCHAT_DEFINITION_MAP, SNAPCHAT_DOCS } from "./snapchat";
+import { TWITTER_DEFINITION_MAP, TWITTER_DOCS } from "./twitter";
 import type { ParameterDefinition } from "./types";
 
 export * from "./types";
+export { AMPLITUDE_DOCS } from "./amplitude";
+export { BING_DOCS } from "./bing";
 export { GA4_DOCS, GOOGLE_ADS_DOCS, META_DOCS, TIKTOK_DOCS } from "./types";
+export { HEAP_DOCS } from "./heap";
+export { MATOMO_DOCS } from "./matomo";
+export { MIXPANEL_DOCS } from "./mixpanel";
+export { PINTEREST_DOCS } from "./pinterest";
+export { CRITEO_DOCS, HUBSPOT_DOCS, LINKEDIN_DOCS, SNAPCHAT_DOCS, TWITTER_DOCS };
+
 
 const GA4_EVENT_PREFIXES = ["epn.", "ep.", "upn.", "up.", "seg."];
 
@@ -72,6 +91,25 @@ export function getDefinition(
     meta: META_DEFINITION_MAP,
     tiktok: TIKTOK_DEFINITION_MAP,
     clarity: undefined,
+    amplitude: AMPLITUDE_DEFINITION_MAP,
+    mixpanel: MIXPANEL_DEFINITION_MAP,
+    matomo: MATOMO_DEFINITION_MAP,
+    linkedin: LINKEDIN_DEFINITION_MAP,
+    reddit: undefined,
+    pinterest: PINTEREST_DEFINITION_MAP,
+    gtm: undefined,
+    adobe: undefined,
+    segment: undefined,
+    bing: BING_DEFINITION_MAP,
+    twitter: TWITTER_DEFINITION_MAP,
+    snapchat: SNAPCHAT_DEFINITION_MAP,
+    youtube: undefined,
+    heap: HEAP_DEFINITION_MAP,
+    criteo: CRITEO_DEFINITION_MAP,
+    piwik: undefined,
+    optimizely: undefined,
+    hubspot: HUBSPOT_DEFINITION_MAP,
+    hotjar: undefined,
     unknown: undefined,
   };
   return maps[platform]?.get(name);
@@ -79,7 +117,7 @@ export function getDefinition(
 
 /**
  * Known events per platform and the parameters that should normally be present.
- * Used by deterministic QA rules ("missing parameter").
+ * Documents each platform's expected event schema.
  */
 export interface KnownEventSpec {
   name: string;
