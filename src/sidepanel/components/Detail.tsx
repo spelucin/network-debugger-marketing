@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ArrowLeft, FileSearch } from "lucide-react";
 import type { MarketingRequest } from "../../core/types";
 import { PLATFORM_INFO } from "../../core/types";
@@ -7,7 +7,6 @@ import { compactUrl } from "../../core/url";
 import { PlatformIcon, platformDotColor } from "./PlatformIcon";
 import { ParamSection } from "./ParamSection";
 import { EcommerceSection } from "./EcommerceSection";
-import { QaSection } from "./QaSection";
 import { RawSection } from "./RawSection";
 import { CopyButton } from "./CopyButton";
 
@@ -20,12 +19,6 @@ export function Detail({ request, onBack }: Props) {
   const [mode, setMode] = useState<"decoded" | "raw">("decoded");
   const decoded = request.decoded;
   const info = PLATFORM_INFO[request.platform];
-
-  const severity = useMemo(() => {
-    if (request.qa.some((i) => i.severity === "warning")) return "issues";
-    if (request.qa.length > 0) return "warnings";
-    return "clean";
-  }, [request.qa]);
 
   const copyParams = () => {
     if (!decoded) return "";
@@ -63,9 +56,6 @@ export function Detail({ request, onBack }: Props) {
             {decoded?.eventName ?? "Unknown request"}
           </div>
           <div className="detail-sub">{info.label}</div>
-        </div>
-        <div className={`detail-qa-pill ${severity}`}>
-          {severity === "issues" ? "Issues" : severity === "warnings" ? "Notices" : "Clean"}
         </div>
       </div>
 
@@ -149,7 +139,6 @@ function DetailDecoded({ request }: { request: MarketingRequest }) {
       {decoded.ecommerce && <EcommerceSection data={decoded.ecommerce} />}
       <ParamSection title="Context" params={decoded.contextParameters} />
       <ParamSection title="Custom parameters" params={decoded.customParameters} />
-      <QaSection issues={request.qa} />
     </div>
   );
 }

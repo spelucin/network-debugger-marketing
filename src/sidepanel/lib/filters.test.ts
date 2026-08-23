@@ -9,7 +9,6 @@ function req(tabId: number | undefined, eventName = "purchase"): MarketingReques
     ...base,
     platform: "ga4",
     eventName,
-    qa: [],
     unknown: false,
   };
 }

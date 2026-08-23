@@ -3,29 +3,18 @@ import { PLATFORM_INFO } from "../../core/types";
 import { bareName } from "../../definitions";
 
 export type PlatformFilter = "all" | Exclude<Platform, "unknown">;
-export type QaFilter = "all" | "issues" | "warnings" | "clean";
 
 export interface FilterState {
   platform: PlatformFilter;
-  qa: QaFilter;
   event: string;
   query: string;
 }
 
 export const DEFAULT_FILTERS: FilterState = {
   platform: "all",
-  qa: "all",
   event: "",
   query: "",
 };
-
-export function qaBucket(
-  request: MarketingRequest
-): "issues" | "warnings" | "clean" {
-  if (request.qa.some((i) => i.severity === "warning")) return "issues";
-  if (request.qa.length > 0) return "warnings";
-  return "clean";
-}
 
 /**
  * Restricts a request list to a single tab. Never mutates the source list,
@@ -94,10 +83,6 @@ export function filterRequests(
 ): MarketingRequest[] {
   return requests.filter((r) => {
     if (filters.platform !== "all" && r.platform !== filters.platform) return false;
-    const bucket = qaBucket(r);
-    if (filters.qa === "issues" && bucket !== "issues") return false;
-    if (filters.qa === "warnings" && bucket !== "warnings") return false;
-    if (filters.qa === "clean" && bucket !== "clean") return false;
     if (filters.event && r.eventName !== filters.event) return false;
     if (filters.query && !matchesQuery(r, filters.query)) return false;
     return true;
@@ -122,25 +107,58 @@ export function countByPlatform(
     meta: 0,
     tiktok: 0,
     clarity: 0,
+    amplitude: 0,
+    mixpanel: 0,
+    matomo: 0,
+    linkedin: 0,
+    reddit: 0,
+    pinterest: 0,
+    gtm: 0,
+    adobe: 0,
+    segment: 0,
+    bing: 0,
+    twitter: 0,
+    snapchat: 0,
+    youtube: 0,
+    heap: 0,
+    criteo: 0,
+    piwik: 0,
+    optimizely: 0,
+    hubspot: 0,
+    hotjar: 0,
   };
   for (const r of requests) {
-    if (r.platform === "ga4") counts.ga4 += 1;
-    else if (r.platform === "google_ads") counts.google_ads += 1;
-    else if (r.platform === "meta") counts.meta += 1;
-    else if (r.platform === "tiktok") counts.tiktok += 1;
-    else if (r.platform === "clarity") counts.clarity += 1;
+    if (r.platform in counts && r.platform !== "unknown") {
+      counts[r.platform as Exclude<Platform, "unknown">] += 1;
+    }
   }
   return counts;
 }
 
-export function countByQa(
+/**
+ * Groups requests by platform for the grouped view. Capture order within a
+ * section is preserved; sections are ordered by their most recent request so
+ * the platform currently firing sits on top. The unknown bucket always sinks
+ * to the bottom.
+ */
+export function groupByPlatform(
   requests: MarketingRequest[]
-): Record<QaFilter, number> {
-  const counts: Record<QaFilter, number> = { all: requests.length, issues: 0, warnings: 0, clean: 0 };
+): Array<{ platform: Platform; requests: MarketingRequest[] }> {
+  const sections = new Map<Platform, MarketingRequest[]>();
   for (const r of requests) {
-    counts[qaBucket(r)] += 1;
+    const list = sections.get(r.platform);
+    if (list) list.push(r);
+    else sections.set(r.platform, [r]);
   }
-  return counts;
+  return [...sections.entries()]
+    .map(([platform, list]) => ({ platform, requests: list }))
+    .sort((a, b) => {
+      if (a.platform === "unknown") return 1;
+      if (b.platform === "unknown") return -1;
+      const aNewest = a.requests[a.requests.length - 1]?.timestamp ?? 0;
+      const bNewest = b.requests[b.requests.length - 1]?.timestamp ?? 0;
+      return bNewest - aNewest;
+    });
 }
 
 export { bareName };

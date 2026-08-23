@@ -62,7 +62,7 @@ export function App() {
       <div className="options-card">
         <h1>Network Decoder</h1>
         <p className="options-tag">
-          Marketing network request decoder &amp; QA companion · v1.5.0
+          Marketing network request decoder · v1.5.0
         </p>
 
         <h2>Capture</h2>
@@ -166,8 +166,8 @@ export function App() {
         <h2>Privacy</h2>
         <p className="options-body">
           Captured network data stays in your browser and is not sent to a server.
-          No analytics, no telemetry, no accounts. Everything — parsing, decoding
-          and QA — runs locally.
+          No analytics, no telemetry, no accounts. Everything — parsing and
+          decoding — runs locally.
         </p>
       </div>
     </div>

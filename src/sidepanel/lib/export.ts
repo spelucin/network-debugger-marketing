@@ -13,7 +13,6 @@ export interface ExportRow {
   value: string;
   currency: string;
   url: string;
-  issues: string;
 }
 
 function paramValue(request: MarketingRequest, name: string): string {
@@ -49,7 +48,6 @@ export function toExportRows(requests: MarketingRequest[]): ExportRow[] {
       value: paramValue(r, "value"),
       currency: paramValue(r, "currency"),
       url: r.url,
-      issues: r.qa.map((i) => i.code).join("; "),
     }));
 }
 
@@ -82,7 +80,6 @@ export function buildJsonExport(requests: MarketingRequest[]): string {
       custom_parameters: custom,
       context,
       ecommerce: decoded?.ecommerce,
-      qa: r.qa.map((i) => ({ code: i.code, severity: i.severity, message: i.message })),
       url: r.url,
     };
   });
@@ -107,7 +104,6 @@ export function buildCsvExport(requests: MarketingRequest[]): string {
     "transaction_id",
     "value",
     "currency",
-    "issues",
     "url",
   ];
   const lines = [header.join(",")];
@@ -122,7 +118,6 @@ export function buildCsvExport(requests: MarketingRequest[]): string {
         csvEscape(row.transaction_id),
         row.value,
         csvEscape(row.currency),
-        csvEscape(row.issues),
         csvEscape(row.url),
       ].join(",")
     );
