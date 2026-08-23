@@ -1,9 +1,10 @@
 // Generates the extension toolbar icons (16/32/48/128 PNG) from a small
 // vector description using only Node's built-in zlib. No native deps.
 //
-// The glyph is a bold white magnifier with a yellow signal pulse inside the
-// lens, on a saturated violet→pink gradient squircle so the icon pops in
-// both light and dark toolbars.
+// The glyph is a bold white signal trace (a request being intercepted)
+// crossing a deep charcoal squircle, terminating in an indigo beacon dot —
+// the same accent the panel UI uses. Flat, dark, legible in light and dark
+// toolbars alike.
 import { deflateSync } from "node:zlib";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
@@ -77,63 +78,56 @@ function drawIcon(size) {
   const buf = makeCanvas(size);
   const S = size * SS; // logical size in supersampled units
   const pad = S * 0.04;
-  const c1 = [124, 58, 237]; // violet #7c3aed
-  const c2 = [219, 39, 119]; // pink #db2777
 
-  // Background rounded square with a diagonal gradient
+  // Background rounded square with a subtle vertical gradient (charcoal with
+  // a cool undertone — reads as "dev tool", survives both toolbar themes).
   const radius = S * 0.24;
+  const top = [38, 40, 47]; // #26282f
+  const bottom = [18, 19, 24]; // #121318
   for (let y = 0; y < buf.W; y++) {
     for (let x = 0; x < buf.H; x++) {
       const cov = roundedCoverage(x, y, pad, pad, S - pad, S - pad, radius);
       if (cov > 0) {
-        const t = (x + y) / (2 * S);
+        const t = y / S;
         blendPx(buf, x, y, [
-          lerp(c1[0], c2[0], t),
-          lerp(c1[1], c2[1], t),
-          lerp(c1[2], c2[2], t),
+          lerp(top[0], bottom[0], t),
+          lerp(top[1], bottom[1], t),
+          lerp(top[2], bottom[2], t),
           255 * cov,
         ]);
       }
     }
   }
 
-  const white = [255, 255, 255, 255];
-  const yellow = [253, 224, 71, 255]; // #fde047
+  const white = [245, 246, 250, 255];
+  const beacon = [124, 124, 240, 255]; // #7c7cf0 — the panel's dark-mode accent
 
-  // Glyph: bold magnifier ring with a handle at 45°
-  const cx = S * 0.44;
-  const cy = S * 0.42;
-  const ringR = S * 0.24;
-  const ringT = S * 0.065;
-  const steps = 128;
-  for (let i = 0; i < steps; i++) {
-    const a = (i / steps) * Math.PI * 2;
-    fillCircle(buf, cx + Math.cos(a) * ringR, cy + Math.sin(a) * ringR, ringT, white);
-  }
-  const hStart = ringR + ringT * 0.2;
-  fillLine(
-    buf,
-    cx + Math.cos(Math.PI / 4) * hStart,
-    cy + Math.sin(Math.PI / 4) * hStart,
-    S * 0.84,
-    S * 0.83,
-    S * 0.13,
-    white
-  );
-
-  // Signal pulse inside the lens
-  const pulse = [
-    [0.31, 0.42],
-    [0.37, 0.42],
-    [0.42, 0.32],
-    [0.47, 0.5],
-    [0.52, 0.42],
-    [0.57, 0.42],
+  // Signal trace: flat → spike → settle → beacon. The waveform reads as an
+  // intercepted request; the indigo dot is the tracker being caught.
+  const trace = [
+    [0.16, 0.5],
+    [0.32, 0.5],
+    [0.42, 0.26],
+    [0.53, 0.74],
+    [0.63, 0.5],
+    [0.78, 0.5],
   ];
-  const lw = S * 0.05;
-  for (let i = 0; i < pulse.length - 1; i++) {
-    fillLine(buf, S * pulse[i][0], S * pulse[i][1], S * pulse[i + 1][0], S * pulse[i + 1][1], lw, yellow);
+  const lw = S * 0.095;
+  for (let i = 0; i < trace.length - 1; i++) {
+    fillLine(
+      buf,
+      S * trace[i][0],
+      S * trace[i][1],
+      S * trace[i + 1][0],
+      S * trace[i + 1][1],
+      lw,
+      white
+    );
   }
+
+  // Beacon dot at the end of the trace — slightly larger than the stroke so
+  // it reads as a bead, not a blob.
+  fillCircle(buf, S * 0.815, S * 0.5, S * 0.088, beacon);
 
   // Downsample to target size
   const out = Buffer.alloc(size * size * 4);

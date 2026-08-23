@@ -3,7 +3,7 @@
   "version": "1.5.0",
   "private": true,
   "type": "module",
-  "description": "Marketing Network Debugger — a sidebar Chrome extension that decodes GA4, Google Ads, Meta, TikTok & Microsoft Clarity tracking requests.",
+  "description": "Marketing network debugger — decodes GA4, Meta, TikTok & more tracking requests live in your sidebar.",
   "scripts": {
     "dev": "node scripts/build.mjs --watch",
     "build": "node scripts/build.mjs",
