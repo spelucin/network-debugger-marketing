@@ -19,7 +19,9 @@ export function rawRequest(
   };
 }
 
-/** Split a query string into the queryParams record shape parsers expect. */
+/** Split a query string into the queryParams record shape parsers expect.
+ * Mirrors production parseQuery: both keys and values are percent-decoded
+ * and `+` collapses to a space. */
 export function queryParams(qs: string): Record<string, string | string[]> {
   const out: Record<string, string | string[]> = {};
   const search = qs.startsWith("?") ? qs.slice(1) : qs;
@@ -27,8 +29,8 @@ export function queryParams(qs: string): Record<string, string | string[]> {
   for (const pair of search.split("&")) {
     if (!pair) continue;
     const eq = pair.indexOf("=");
-    const key = eq === -1 ? pair : pair.slice(0, eq);
-    const value = eq === -1 ? "" : decodeURIComponent(pair.slice(eq + 1));
+    const key = safeDecode(eq === -1 ? pair : pair.slice(0, eq));
+    const value = safeDecode(eq === -1 ? "" : pair.slice(eq + 1));
     if (key in out) {
       const prev = out[key] as string | string[];
       if (Array.isArray(prev)) prev.push(value);
@@ -38,4 +40,12 @@ export function queryParams(qs: string): Record<string, string | string[]> {
     }
   }
   return out;
+}
+
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value.replace(/\+/g, " "));
+  } catch {
+    return value;
+  }
 }
