@@ -12,9 +12,21 @@ window.addEventListener("message", (event) => {
         method?: string;
         url?: string;
         bodyText?: string;
+        urls?: unknown;
       }
     | undefined;
   if (!data || data.source !== TOKEN) return;
+
+  if (data.kind === "resources" && Array.isArray(data.urls)) {
+    const urls = data.urls
+      .filter((u): u is string => typeof u === "string")
+      .slice(0, 500);
+    if (urls.length === 0) return;
+    void chrome.runtime
+      .sendMessage({ type: "mainworld-resources", urls })
+      .catch(() => undefined);
+    return;
+  }
 
   void chrome.runtime
     .sendMessage({

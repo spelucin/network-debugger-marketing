@@ -2,11 +2,15 @@
 // "world": "MAIN"). Patches fetch / XHR / sendBeacon so tracking calls are
 // observed at the source — this works even when the browser never dispatches
 // webRequest events to the extension (adblockers, Edge tracking prevention,
-// Brave shields, or Chromium webRequest wakeup bugs).
+// Brave shields, or Chromium webRequest wakeup bugs). A PerformanceObserver
+// additionally reports SDK script/pixel loads for the detection chips,
+// because Chromium only delivers webRequest sub-resource events when host
+// permissions cover both the request URL and its initiator.
 //
 // The page context has no chrome.* APIs, so observations are posted to the
 // isolated-world relay via window.postMessage.
-import { looksTracked } from "../shared/trackers";
+import { classifyBeacon, looksTracked } from "../shared/trackers";
+import { identifySdkScript } from "../shared/detection/script-loads";
 
 (() => {
   const TOKEN = "nd-mainworld";
@@ -113,5 +117,65 @@ import { looksTracked } from "../shared/trackers";
       }
       return nativeSendBeacon(url, data);
     };
+  }
+
+  // --- resource loads (PerformanceObserver) ---
+  // Feeds the background's detection chips with script/pixel sightings the
+  // webRequest plane cannot see (see header note). Only tracker-matching
+  // URLs are posted, batched to keep messaging cheap.
+  if (typeof PerformanceObserver !== "undefined") {
+    let pending: string[] = [];
+    let flushTimer: number | undefined;
+
+    const flush = () => {
+      if (flushTimer !== undefined) {
+        window.clearTimeout(flushTimer);
+        flushTimer = undefined;
+      }
+      if (pending.length === 0) return;
+      const urls = pending;
+      pending = [];
+      try {
+        window.postMessage({ source: TOKEN, kind: "resources", urls }, "*");
+      } catch {
+        // A failed observation must not affect the page.
+      }
+    };
+
+    const queue = (url: string) => {
+      pending.push(url);
+      if (pending.length >= 50) {
+        flush();
+      } else if (flushTimer === undefined) {
+        // Short window: detection chips should light up promptly.
+        flushTimer = window.setTimeout(flush, 300);
+      }
+    };
+
+    try {
+      new PerformanceObserver((list) => {
+        try {
+          for (const entry of list.getEntries() as PerformanceResourceTiming[]) {
+            const url = entry.name;
+            if (typeof url !== "string") continue;
+            const resourceType =
+              entry.initiatorType === "script" ? "script" : undefined;
+            if (
+              classifyBeacon(url) === null &&
+              identifySdkScript(url, resourceType) === null
+            ) {
+              continue;
+            }
+            queue(url);
+          }
+        } catch {
+          // Ignore.
+        }
+      }).observe({ type: "resource", buffered: true });
+    } catch {
+      // Engines that reject unknown entry types; observation is best-effort.
+    }
+
+    window.addEventListener("pagehide", flush);
   }
 })();

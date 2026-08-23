@@ -48,20 +48,8 @@ export function loadSnapshot(): Promise<CaptureSnapshot> {
   );
 }
 
-/** Persist session QA context (bounded event entries) so it survives restarts. */
-export function loadQaEvents(): Promise<unknown[]> {
-  return AREA.get(STORAGE_KEYS.qaEvents).then((res) => {
-    const stored = res[STORAGE_KEYS.qaEvents];
-    return Array.isArray(stored) ? stored : [];
-  });
-}
-
-export function saveQaEvents(events: unknown[]): Promise<void> {
-  return AREA.set({ [STORAGE_KEYS.qaEvents]: events });
-}
-
 export function clearStorage(): Promise<void> {
-  return AREA.remove([STORAGE_KEYS.requests, STORAGE_KEYS.qaEvents]);
+  return AREA.remove([STORAGE_KEYS.requests]);
 }
 
 /** Debounce helper for batched storage writes. */

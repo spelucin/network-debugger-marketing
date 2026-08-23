@@ -39,6 +39,9 @@ const setBadgeBackgroundColor = vi.fn(async () => undefined);
     onBeforeRequest: {
       addListener: (fn: Listener) => (listeners.beforeRequest = fn),
     },
+    onCompleted: {
+      addListener: (fn: Listener) => (listeners.completedRequest = fn),
+    },
   },
   tabs: {
     onActivated: { addListener: () => undefined },
@@ -292,5 +295,141 @@ describe("main-world ingestion", () => {
 
     const snapshot = await getSnapshot();
     expect(snapshot.snapshot?.requests).toHaveLength(1);
+  });
+});
+
+describe("observation plane (capture stats)", () => {
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  function sendCompleted(details: Record<string, unknown>): void {
+    listeners["completedRequest"]!(details);
+  }
+
+  async function getStats(): Promise<{
+    ok: boolean;
+    stats?: {
+      platforms: Array<{ platform: string; hits: number; scriptIds: string[] }>;
+      perf: { observed: number; matched: number; avgMs: number };
+    };
+  }> {
+    return new Promise((resolve) => {
+      listeners["message"]!(
+        { type: "get-capture-stats", tabId: 7 },
+        {},
+        resolve
+      );
+    });
+  }
+
+  it("builds per-tab platform presence and throughput from completed requests", async () => {
+    await import("./index");
+    flushStorage();
+    await getSnapshot();
+
+    sendCompleted({
+      url: "https://www.google-analytics.com/g/collect?v=2",
+      tabId: 7,
+      type: "xmlhttprequest",
+    });
+    // SDK loader only — Meta shows up before any /tr beacon fires
+    sendCompleted({
+      url: "https://connect.facebook.net/en_US/fbevents.js",
+      tabId: 7,
+      type: "script",
+    });
+    // Unmatched traffic still counts toward observed
+    sendCompleted({
+      url: "https://cdn.example.com/app.bundle.js",
+      tabId: 7,
+      type: "script",
+    });
+    // Another tab must not leak into tab 7's snapshot
+    sendCompleted({
+      url: "https://www.clarity.ms/tag/proj42",
+      tabId: 99,
+      type: "script",
+    });
+    // Ad creatives are not tagging signals — image from an ad host is skipped
+    sendCompleted({
+      url: "https://securepubads.g.doubleclick.net/pcs/view?ad_url=x.png",
+      tabId: 7,
+      type: "image",
+    });
+
+    const res = await getStats();
+    expect(res.ok).toBe(true);
+    expect(res.stats?.perf.observed).toBe(3);
+    expect(res.stats?.perf.matched).toBe(1);
+    const ga = res.stats?.platforms.find((p) => p.platform === "ga4");
+    expect(ga?.hits).toBe(1);
+    const meta = res.stats?.platforms.find((p) => p.platform === "meta");
+    expect(meta).toBeDefined();
+    expect(res.stats?.perf.avgMs).toBeTypeOf("number");
+  });
+
+  it("records script ids lifted from loader urls", async () => {
+    await import("./index");
+    flushStorage();
+    await getSnapshot(); // ensure init (and listener wiring) has settled
+
+    sendCompleted({
+      url: "https://www.googletagmanager.com/gtag/js?id=AW-1100011",
+      tabId: 7,
+      type: "script",
+    });
+
+    const res = await getStats();
+    const ads = res.stats?.platforms.find((p) => p.platform === "google_ads");
+    expect(ads?.scriptIds).toContain("AW-1100011");
+  });
+
+  it("accepts page-side resource feeds where webRequest is blind", async () => {
+    await import("./index");
+    flushStorage();
+    await getSnapshot(); // ensure init (and listener wiring) has settled
+
+    const sendResources = (
+      urls: string[],
+      sender: Record<string, unknown>
+    ): void => {
+      listeners["message"]!(
+        { type: "mainworld-resources", urls },
+        sender,
+        () => undefined
+      );
+    };
+
+    sendResources(
+      [
+        "https://www.google-analytics.com/g/collect?v=2&tid=G-FEED1",
+        "https://connect.facebook.net/en_US/fbevents.js",
+        "https://www.clarity.ms/tag/feedproj",
+        "https://cdn.example.com/app.bundle.js", // unrelated — filtered upstream
+      ].slice(0, 3),
+      { tab: { id: 7 } }
+    );
+
+    const res = await getStats();
+    expect(res.stats?.perf.observed).toBe(3);
+    expect(res.stats?.perf.matched).toBe(2); // GA + Clarity; fbevents is loader-only
+    const ga = res.stats?.platforms.find((p) => p.platform === "ga4");
+    expect(ga?.hits).toBe(1);
+    const meta = res.stats?.platforms.find((p) => p.platform === "meta");
+    expect(meta).toBeDefined();
+
+    // Duplicate sightings (SPA re-runs, relay retries) must not double-count.
+    sendResources(
+      ["https://www.google-analytics.com/g/collect?v=2&tid=G-FEED1"],
+      { tab: { id: 7 } }
+    );
+    const again = await getStats();
+    expect(again.stats?.perf.observed).toBe(3);
+
+    // Batches without a tab context are ignored entirely.
+    sendResources(["https://www.google-analytics.com/g/collect?v=3"], {});
+    const noTab = await getStats();
+    expect(noTab.stats?.perf.observed).toBe(3);
   });
 });
