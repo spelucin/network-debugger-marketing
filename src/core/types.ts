@@ -1,4 +1,4 @@
-// Normalized internal model shared by parsers, QA, background capture and UI.
+// Normalized internal model shared by parsers, background capture and UI.
 
 export type Platform =
   | "ga4"
@@ -6,6 +6,25 @@ export type Platform =
   | "meta"
   | "tiktok"
   | "clarity"
+  | "amplitude"
+  | "mixpanel"
+  | "matomo"
+  | "linkedin"
+  | "reddit"
+  | "pinterest"
+  | "gtm"
+  | "adobe"
+  | "segment"
+  | "bing"
+  | "twitter"
+  | "snapchat"
+  | "youtube"
+  | "heap"
+  | "criteo"
+  | "piwik"
+  | "optimizely"
+  | "hubspot"
+  | "hotjar"
   | "unknown";
 
 export const PLATFORMS: readonly Platform[] = [
@@ -14,6 +33,25 @@ export const PLATFORMS: readonly Platform[] = [
   "meta",
   "tiktok",
   "clarity",
+  "amplitude",
+  "mixpanel",
+  "matomo",
+  "linkedin",
+  "reddit",
+  "pinterest",
+  "gtm",
+  "adobe",
+  "segment",
+  "bing",
+  "twitter",
+  "snapchat",
+  "youtube",
+  "heap",
+  "criteo",
+  "piwik",
+  "optimizely",
+  "hubspot",
+  "hotjar",
   "unknown",
 ];
 
@@ -29,6 +67,25 @@ export const PLATFORM_INFO: Record<Platform, PlatformInfo> = {
   meta: { id: "meta", label: "Meta", shortLabel: "META" },
   tiktok: { id: "tiktok", label: "TikTok", shortLabel: "TIKTOK" },
   clarity: { id: "clarity", label: "Microsoft Clarity", shortLabel: "CLARITY" },
+  amplitude: { id: "amplitude", label: "Amplitude", shortLabel: "AMP" },
+  mixpanel: { id: "mixpanel", label: "Mixpanel", shortLabel: "MIX" },
+  matomo: { id: "matomo", label: "Matomo", shortLabel: "MATOMO" },
+  linkedin: { id: "linkedin", label: "LinkedIn", shortLabel: "LI" },
+  reddit: { id: "reddit", label: "Reddit", shortLabel: "REDDIT" },
+  pinterest: { id: "pinterest", label: "Pinterest", shortLabel: "PIN" },
+  gtm: { id: "gtm", label: "Google Tag Manager", shortLabel: "GTM" },
+  adobe: { id: "adobe", label: "Adobe", shortLabel: "ADOBE" },
+  segment: { id: "segment", label: "Segment", shortLabel: "SEGMENT" },
+  bing: { id: "bing", label: "Bing", shortLabel: "BING" },
+  twitter: { id: "twitter", label: "Twitter", shortLabel: "TWTR" },
+  snapchat: { id: "snapchat", label: "Snapchat", shortLabel: "SNAP" },
+  youtube: { id: "youtube", label: "YouTube", shortLabel: "YT" },
+  heap: { id: "heap", label: "Heap", shortLabel: "HEAP" },
+  criteo: { id: "criteo", label: "Criteo", shortLabel: "CRITEO" },
+  piwik: { id: "piwik", label: "Piwik", shortLabel: "PIWIK" },
+  optimizely: { id: "optimizely", label: "Optimizely", shortLabel: "OPT" },
+  hubspot: { id: "hubspot", label: "HubSpot", shortLabel: "HUBSPOT" },
+  hotjar: { id: "hotjar", label: "Hotjar", shortLabel: "HOTJAR" },
   unknown: { id: "unknown", label: "Unknown", shortLabel: "UNKNOWN" },
 };
 
@@ -77,18 +134,6 @@ export interface EcommerceData {
   tax?: number;
   coupon?: string;
   affiliation?: string;
-}
-
-export type QASeverity = "warning" | "info";
-
-export interface QAIssue {
-  /** Stable id used to de-duplicate issues. */
-  id: string;
-  severity: QASeverity;
-  /** Machine code, e.g. "possible-duplicate". */
-  code: string;
-  message: string;
-  detail?: string;
 }
 
 export interface RawRequest {
@@ -140,7 +185,6 @@ export interface MarketingRequest {
   bodyText?: string;
   headers?: Record<string, string>;
   decoded?: DecodedEvent;
-  qa: QAIssue[];
   unknown: boolean;
   sizeBytes?: number;
 }
@@ -149,28 +193,29 @@ export interface MarketingRequest {
  * Capture = network interception. Always on by default, like a network
  * inspector: every matching request is stored regardless of recording.
  *
- * Record = what the panel keeps on screen. Two non-exclusive scopes decide
- * whether the list is cleared on navigation / tab switches:
+ * The panel boots into capture-only mode (neither recording scope active):
+ * requests stream in live, but the view is transient and starts fresh on
+ * every navigation. Recording is strictly opt-in:
  *   - recordThisTab: keep the current tab's requests; switching tabs resets.
  *   - recordAllTabs: keep everything from every tab and domain; never resets.
- * With neither active the list is transient: any navigation (refresh, domain
- * change) clears it and starts fresh.
  */
 export interface CaptureSettings {
   captureEnabled: boolean;
   recordThisTab: boolean;
   recordAllTabs: boolean;
+  /** How the request list lays out captured traffic. */
+  listView: "grouped" | "history";
   retainLimit: number;
   theme: "system" | "light" | "dark";
 }
 
 export const DEFAULT_SETTINGS: CaptureSettings = {
   captureEnabled: true,
+  // Capture-only by default: interception runs, but the view stays transient
+  // until the user explicitly turns on a recording scope in the header.
   recordThisTab: false,
-  // Default to the inspector-like scope: history from every tab stays visible
-  // no matter which tab the panel is opened from, so requests captured while
-  // the panel was closed are always there when it opens.
-  recordAllTabs: true,
+  recordAllTabs: false,
+  listView: "grouped",
   retainLimit: 5000,
   theme: "system",
 };
@@ -186,3 +231,34 @@ export interface CaptureSnapshot {
   /** Id of the active tab in the focused window, tracked by the worker. */
   activeTabId?: number;
 }
+
+/** One platform observed on a tab, from URL classification and/or its SDK
+ * loader script — even before (or without) any decoded beacon. */
+export interface DetectedPlatform {
+  platform: Platform;
+  /** Beacon-classified request count since last reset. */
+  hits: number;
+  /** IDs lifted from loader scripts (GTM-…, G-…, AW-…, project ids). */
+  scriptIds: string[];
+}
+
+/** Observation-plane throughput counters for one tab. */
+export interface MatcherPerf {
+  /** URLs classified since last reset (static assets skipped pre-count). */
+  observed: number;
+  /** Subset that matched a known tracker endpoint or SDK script. */
+  matched: number;
+  /** Mean classification time in milliseconds. */
+  avgMs: number;
+}
+
+/** What the panel's detection row / status footer render. */
+export interface CaptureStats {
+  platforms: DetectedPlatform[];
+  perf: MatcherPerf;
+}
+
+export const EMPTY_CAPTURE_STATS: CaptureStats = {
+  platforms: [],
+  perf: { observed: 0, matched: 0, avgMs: 0 },
+};
