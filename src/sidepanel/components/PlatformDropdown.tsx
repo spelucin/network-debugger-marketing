@@ -76,7 +76,7 @@ export function PlatformDropdown({ requests, value, onChange }: Props) {
         <span className="platform-filter-label">
           {active ? active.label : "All platforms"}
         </span>
-        <span className="platform-filter-count num">{active ? active.count : total}</span>
+        {active && <span className="platform-filter-count num">{active.count}</span>}
         <ChevronDown size={11} className="platform-filter-caret" />
       </button>
 
