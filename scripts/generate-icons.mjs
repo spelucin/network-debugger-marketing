@@ -100,7 +100,7 @@ function drawIcon(size) {
   }
 
   const white = [245, 246, 250, 255];
-  const beacon = [124, 124, 240, 255]; // #7c7cf0 — the panel's dark-mode accent
+  const beacon = [78, 124, 202, 255]; // denim blue — matches the panel accent
 
   // Signal trace: flat → spike → settle → beacon. The waveform reads as an
   // intercepted request; the indigo dot is the tracker being caught.
