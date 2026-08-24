@@ -48,6 +48,16 @@ describe("GoogleAdsParser.canParse", () => {
     ).toBe(true);
   });
 
+  it("accepts consent-mode /ccm/ collect pings", () => {
+    expect(
+      GoogleAdsParser.canParse(
+        req(
+          "https://ad.doubleclick.net/ccm/s/collect?auid=668259794.1787185004&fmt=8&gtm=45He68j1h2v9191109959za200zd9191109959xea&mt=8"
+        )
+      )
+    ).toBe(true);
+  });
+
   it("accepts Floodlight activity pings", () => {
     expect(
       GoogleAdsParser.canParse(

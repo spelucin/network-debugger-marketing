@@ -55,10 +55,12 @@ export const GoogleAdsParser: MarketingParser = {
     if (isAdsHost(url.hostname) && url.pathname.startsWith("/pagead/")) {
       return true;
     }
-    // Campaign Manager measurement and Floodlight activity pings.
+    // Campaign Manager measurement, consent-mode collect (/ccm/), and
+    // Floodlight activity pings.
     if (
       url.hostname === "ad.doubleclick.net" &&
       (url.pathname.startsWith("/cm/") ||
+        url.pathname.startsWith("/ccm/") ||
         url.pathname.startsWith("/ddm/activity") ||
         url.pathname.startsWith("/activity"))
     ) {
