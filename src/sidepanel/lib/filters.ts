@@ -97,44 +97,6 @@ export function collectEvents(requests: MarketingRequest[]): string[] {
   return [...seen].sort((a, b) => a.localeCompare(b));
 }
 
-export function countByPlatform(
-  requests: MarketingRequest[]
-): Record<PlatformFilter, number> {
-  const counts: Record<PlatformFilter, number> = {
-    all: requests.length,
-    ga4: 0,
-    google_ads: 0,
-    meta: 0,
-    tiktok: 0,
-    clarity: 0,
-    amplitude: 0,
-    mixpanel: 0,
-    matomo: 0,
-    linkedin: 0,
-    reddit: 0,
-    pinterest: 0,
-    gtm: 0,
-    adobe: 0,
-    segment: 0,
-    bing: 0,
-    twitter: 0,
-    snapchat: 0,
-    youtube: 0,
-    heap: 0,
-    criteo: 0,
-    piwik: 0,
-    optimizely: 0,
-    hubspot: 0,
-    hotjar: 0,
-  };
-  for (const r of requests) {
-    if (r.platform in counts && r.platform !== "unknown") {
-      counts[r.platform as Exclude<Platform, "unknown">] += 1;
-    }
-  }
-  return counts;
-}
-
 /**
  * Groups requests by platform for the grouped view. Capture order within a
  * section is preserved; sections are ordered by their most recent request so

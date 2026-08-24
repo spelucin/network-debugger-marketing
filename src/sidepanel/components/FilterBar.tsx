@@ -1,14 +1,12 @@
-import { ChevronDown, History, Layers, Search, X } from "lucide-react";
+import { ChevronDown, Search, X } from "lucide-react";
 import type { MarketingRequest } from "../../core/types";
-import { PLATFORM_INFO } from "../../core/types";
 import {
   collectEvents,
-  countByPlatform,
   type FilterState,
-  type PlatformFilter,
 } from "../lib/filters";
 import type { ListView } from "./RequestList";
 import { Segmented } from "./Segmented";
+import { PlatformDropdown } from "./PlatformDropdown";
 
 interface Props {
   filters: FilterState;
@@ -20,15 +18,6 @@ interface Props {
   onViewChange: (view: ListView) => void;
 }
 
-const PLATFORM_TABS: Array<{ id: PlatformFilter; label: string }> = [
-  { id: "all", label: "ALL" },
-  { id: "ga4", label: PLATFORM_INFO.ga4.shortLabel },
-  { id: "google_ads", label: PLATFORM_INFO.google_ads.shortLabel },
-  { id: "meta", label: PLATFORM_INFO.meta.shortLabel },
-  { id: "tiktok", label: PLATFORM_INFO.tiktok.shortLabel },
-  { id: "clarity", label: PLATFORM_INFO.clarity.shortLabel },
-];
-
 export function FilterBar({
   filters,
   requests,
@@ -38,7 +27,6 @@ export function FilterBar({
   view,
   onViewChange,
 }: Props) {
-  const counts = countByPlatform(requests);
   const events = collectEvents(requests);
 
   return (
@@ -89,65 +77,40 @@ export function FilterBar({
         </div>
       </div>
 
-      <div className="tab-row">
-        {PLATFORM_TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            className={`chip ${filters.platform === tab.id ? "active" : ""}`}
-            onClick={() => onFiltersChange({ ...filters, platform: tab.id })}
-          >
-            {tab.label}
-            <span className="chip-count">{counts[tab.id]}</span>
-          </button>
-        ))}
-      </div>
-
       <div className="tab-row tab-row-options">
+        <div className="filter-controls">
+          <PlatformDropdown
+            requests={requests}
+            value={filters.platform}
+            onChange={(platform) => onFiltersChange({ ...filters, platform })}
+          />
+          <div className="event-select-wrap">
+            <select
+              className="event-select"
+              value={filters.event}
+              onChange={(e) => onFiltersChange({ ...filters, event: e.target.value })}
+              aria-label="Filter by event"
+            >
+              <option value="">All events</option>
+              {events.map((ev) => (
+                <option key={ev} value={ev}>
+                  {ev}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={12} className="event-select-caret" />
+          </div>
+        </div>
         <Segmented
           ariaLabel="List layout"
           className="view-toggle"
           value={view}
           options={[
-            {
-              id: "grouped",
-              label: (
-                <>
-                  <Layers size={11} />
-                  Platforms
-                </>
-              ),
-              title: "Group requests by platform, most recently active first.",
-            },
-            {
-              id: "history",
-              label: (
-                <>
-                  <History size={11} />
-                  History
-                </>
-              ),
-              title: "Flat chronological list across all platforms.",
-            },
+            { id: "grouped", label: "Platforms" },
+            { id: "history", label: "History" },
           ]}
           onChange={onViewChange}
         />
-        <div className="event-select-wrap">
-          <select
-            className="event-select"
-            value={filters.event}
-            onChange={(e) => onFiltersChange({ ...filters, event: e.target.value })}
-            aria-label="Filter by event"
-          >
-            <option value="">All events</option>
-            {events.map((ev) => (
-              <option key={ev} value={ev}>
-                {ev}
-              </option>
-            ))}
-          </select>
-          <ChevronDown size={12} className="event-select-caret" />
-        </div>
       </div>
     </div>
   );
