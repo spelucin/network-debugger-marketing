@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Network Decoder — Marketing Network Debugger",
+  "name": "Network Decoder",
   "short_name": "Network Decoder",
   "version": "1.5.0",
-  "description": "See every marketing request your browser sends — GA4, Meta, TikTok & more — decoded live in your sidebar. 100% local.",
+  "description": "See the marketing requests your browser sends to GA4, Meta, TikTok and more, decoded live in your sidebar. Everything stays local.",
   "minimum_chrome_version": "116",
   "permissions": ["webRequest", "sidePanel", "storage", "unlimitedStorage", "alarms"],
   "host_permissions": [
