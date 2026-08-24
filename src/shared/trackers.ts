@@ -29,6 +29,9 @@ const BEACON_RULES: ReadonlyArray<BeaconRule> = [
   { platform: "ga4", hostSuffix: "region2.google-analytics.com" },
   { platform: "ga4", hostSuffix: "region1.analytics.google.com" },
   { platform: "ga4", hostSuffix: "region2.analytics.google.com" },
+  // GA4 relayed via DoubleClick (consent mode / Signals). Must sit before
+  // the broad google_ads doubleclick.net rule below.
+  { platform: "ga4", hostSuffix: "stats.g.doubleclick.net", pathPrefixes: ["/g/collect"] },
 
   // ── Google Tag Manager + gtag ─────────────────────────────────────────────
   { platform: "gtm", hostSuffix: "googletagmanager.com" },
@@ -50,9 +53,8 @@ const BEACON_RULES: ReadonlyArray<BeaconRule> = [
   { platform: "google_ads", hostSuffix: "ep1.adtrafficquality.google" },
   { platform: "google_ads", hostSuffix: "ep2.adtrafficquality.google" },
   { platform: "google_ads", hostSuffix: "merchant-center-analytics.goog" },
-  // stats.g.doubleclick.net serves both products: /g/collect is GA4
-  // measurement relayed via DoubleClick; /r|j/collect are Ads Signals.
-  { platform: "ga4", hostSuffix: "stats.g.doubleclick.net", pathPrefixes: ["/g/collect"] },
+  // stats.g /r|j/collect are Ads Signals (the /g/collect GA4 relay is
+  // matched earlier, above).
   { platform: "google_ads", hostSuffix: "stats.g.doubleclick.net", pathPrefixes: ["/r/collect", "/j/collect"] },
 
   // ── Meta Pixel ────────────────────────────────────────────────────────────
