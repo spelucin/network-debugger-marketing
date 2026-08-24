@@ -1,20 +1,10 @@
 import { X } from "lucide-react";
 import type { CaptureSettings } from "../../core/types";
+import { watchDomains } from "../../shared/watch-urls";
 import { Switch } from "./Switch";
 import { Segmented } from "./Segmented";
 
-const WATCH_DOMAINS = [
-  "google-analytics.com",
-  "analytics.google.com",
-  "googletagmanager.com",
-  "googleadservices.com",
-  "doubleclick.net",
-  "adservice.google.com",
-  "google.com/pagead",
-  "facebook.com",
-  "facebook.net",
-  "tiktok.com",
-];
+const WATCH_DOMAINS = watchDomains();
 
 interface Props {
   settings: CaptureSettings;

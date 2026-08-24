@@ -2,21 +2,11 @@ import { useEffect, useState } from "react";
 import type { CaptureSettings } from "../core/types";
 import { DEFAULT_SETTINGS } from "../core/types";
 import { STORAGE_KEYS } from "../shared/messages";
+import { watchDomains } from "../shared/watch-urls";
 import { Switch } from "../sidepanel/components/Switch";
 import { Segmented } from "../sidepanel/components/Segmented";
 
-const WATCH_DOMAINS = [
-  "google-analytics.com",
-  "analytics.google.com",
-  "googletagmanager.com",
-  "googleadservices.com",
-  "doubleclick.net",
-  "adservice.google.com",
-  "google.com/pagead",
-  "facebook.com",
-  "facebook.net",
-  "tiktok.com",
-];
+const WATCH_DOMAINS = watchDomains();
 
 export function App() {
   const [settings, setSettings] = useState<CaptureSettings>(DEFAULT_SETTINGS);
