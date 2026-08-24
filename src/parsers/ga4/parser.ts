@@ -145,10 +145,15 @@ export const Ga4Parser: MarketingParser = {
   canParse(request: RawRequest): boolean {
     const url = safeUrl(request.url);
     if (!url) return false;
+    // GA4 measurement relayed through DoubleClick (consent-mode / Signals):
+    // same /g/collect shape, different host. The strict G-… tid check does
+    // not apply to the relay.
+    const isStatsRelay =
+      url.hostname === "stats.g.doubleclick.net" && url.pathname === "/g/collect";
     return (
-      GA4_HOST_RE.test(url.hostname) &&
-      GA4_PATH_RE.test(url.pathname) &&
-      /^G-[A-Z0-9]+$/i.test(stringValue(request.queryParams.tid))
+      ((GA4_HOST_RE.test(url.hostname) && GA4_PATH_RE.test(url.pathname)) ||
+        isStatsRelay) &&
+      (isStatsRelay || /^G-[A-Z0-9]+$/i.test(stringValue(request.queryParams.tid)))
     );
   },
 

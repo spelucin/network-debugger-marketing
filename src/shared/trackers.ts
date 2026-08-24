@@ -50,7 +50,10 @@ const BEACON_RULES: ReadonlyArray<BeaconRule> = [
   { platform: "google_ads", hostSuffix: "ep1.adtrafficquality.google" },
   { platform: "google_ads", hostSuffix: "ep2.adtrafficquality.google" },
   { platform: "google_ads", hostSuffix: "merchant-center-analytics.goog" },
-  { platform: "google_ads", hostSuffix: "stats.g.doubleclick.net" },
+  // stats.g.doubleclick.net serves both products: /g/collect is GA4
+  // measurement relayed via DoubleClick; /r|j/collect are Ads Signals.
+  { platform: "ga4", hostSuffix: "stats.g.doubleclick.net", pathPrefixes: ["/g/collect"] },
+  { platform: "google_ads", hostSuffix: "stats.g.doubleclick.net", pathPrefixes: ["/r/collect", "/j/collect"] },
 
   // ── Meta Pixel ────────────────────────────────────────────────────────────
   { platform: "meta", hostSuffix: "facebook.com", pathPrefixes: ["/tr", "/fr/"] },

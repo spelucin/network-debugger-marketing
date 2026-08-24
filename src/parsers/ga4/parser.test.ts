@@ -29,9 +29,47 @@ describe("Ga4Parser.canParse", () => {
     const r = G("/g/collect", "v=2&en=page_view");
     expect(Ga4Parser.canParse(r)).toBe(false);
   });
+
+  it("accepts the stats.g.doubleclick.net consent-mode relay", () => {
+    const r = rawRequest(
+      "https://stats.g.doubleclick.net/g/collect?v=2&tid=G-ABC123&en=purchase&t=web&cid=123",
+      { queryParams: queryParams("v=2&tid=G-ABC123&en=purchase&t=web&cid=123") }
+    );
+    expect(Ga4Parser.canParse(r)).toBe(true);
+  });
+
+  it("accepts the relay even without a tid", () => {
+    const r = rawRequest("https://stats.g.doubleclick.net/g/collect?v=2&en=page_view", {
+      queryParams: queryParams("v=2&en=page_view"),
+    });
+    expect(Ga4Parser.canParse(r)).toBe(true);
+  });
+
+  it("still rejects stats.g /r/collect (that is Ads Signals)", () => {
+    const r = rawRequest("https://stats.g.doubleclick.net/r/collect?tid=G-ABC123", {
+      queryParams: queryParams("tid=G-ABC123"),
+    });
+    expect(Ga4Parser.canParse(r)).toBe(false);
+  });
 });
 
 describe("Ga4Parser.parse", () => {
+  it("decodes a relayed stats.g event like a direct one", () => {
+    const r = rawRequest(
+      "https://stats.g.doubleclick.net/g/collect?v=2&tid=G-ABC123&cid=9.8&en=purchase&epn.value=19.99",
+      {
+        queryParams: queryParams(
+          "v=2&tid=G-ABC123&cid=9.8&en=purchase&epn.value=19.99"
+        ),
+      }
+    );
+    const d = Ga4Parser.parse(r);
+
+    expect(d.platform).toBe("ga4");
+    expect(d.eventName).toBe("purchase");
+    expect(d.meta.measurementId).toBe("G-ABC123");
+  });
+
   it("decodes a page_view event and its standard params", () => {
     const r = G(
       "/g/collect",

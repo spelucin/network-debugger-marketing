@@ -39,9 +39,41 @@ describe("GoogleAdsParser.canParse", () => {
       )
     ).toBe(false);
   });
+
+  it("accepts Campaign Manager measurement pings", () => {
+    expect(
+      GoogleAdsParser.canParse(
+        req("https://ad.doubleclick.net/cm/s/collect?ty=1&aw_id=AW-9")
+      )
+    ).toBe(true);
+  });
+
+  it("accepts Floodlight activity pings", () => {
+    expect(
+      GoogleAdsParser.canParse(
+        req("https://ad.doubleclick.net/ddm/activity/src=123;type=456")
+      )
+    ).toBe(true);
+    expect(
+      GoogleAdsParser.canParse(
+        req("https://fls.doubleclick.net/activityj;src=123;type=456")
+      )
+    ).toBe(true);
+  });
 });
 
 describe("GoogleAdsParser.parse", () => {
+  it("decodes a Campaign Manager collect ping as a conversion", () => {
+    const r = req(
+      "https://ad.doubleclick.net/cm/s/collect?ty=1&aw_id=AW-987654321&gclid=xyz"
+    );
+    const d = GoogleAdsParser.parse(r);
+
+    expect(d.platform).toBe("google_ads");
+    expect(d.eventName).toBe("conversion");
+    expect(d.meta.conversionId).toBe("AW-987654321");
+  });
+
   it("decodes a conversion event and its id", () => {
     const r = req(
       "https://google.com/pagead/conversion/?google_cvt=1&ev=conversion&aw_id=AW-123456789&value=10&currency_code=USD&gclid=abc123"

@@ -72,6 +72,12 @@ describe("new-platform beacon rules", () => {
     expect(classifyBeacon("https://analytics.customer.com/piwik.php?idsite=2")).toBe("matomo");
   });
 
+  it("splits stats.g.doubleclick.net by path between GA4 and Ads", () => {
+    expect(classifyBeacon("https://stats.g.doubleclick.net/g/collect?v=2&tid=G-ABC")).toBe("ga4");
+    expect(classifyBeacon("https://stats.g.doubleclick.net/r/collect?v=1")).toBe("google_ads");
+    expect(classifyBeacon("https://stats.g.doubleclick.net/j/collect?v=1")).toBe("google_ads");
+  });
+
   it("does not treat lookalike paths on unrelated domains as beacons", () => {
     expect(looksTracked("https://example.com/en/matomo-guide")).toBe(false);
     expect(looksTracked("https://example.com/downloads/piwik.php.backup")).toBe(false);
