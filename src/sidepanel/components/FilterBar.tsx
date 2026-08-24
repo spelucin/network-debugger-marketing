@@ -8,6 +8,7 @@ import {
   type PlatformFilter,
 } from "../lib/filters";
 import type { ListView } from "./RequestList";
+import { Segmented } from "./Segmented";
 
 interface Props {
   filters: FilterState;
@@ -26,11 +27,6 @@ const PLATFORM_TABS: Array<{ id: PlatformFilter; label: string }> = [
   { id: "meta", label: PLATFORM_INFO.meta.shortLabel },
   { id: "tiktok", label: PLATFORM_INFO.tiktok.shortLabel },
   { id: "clarity", label: PLATFORM_INFO.clarity.shortLabel },
-];
-
-const VIEW_TABS: Array<{ id: ListView; label: string; icon: typeof Layers }> = [
-  { id: "grouped", label: "Platforms", icon: Layers },
-  { id: "history", label: "History", icon: History },
 ];
 
 export function FilterBar({
@@ -108,27 +104,34 @@ export function FilterBar({
       </div>
 
       <div className="tab-row tab-row-options">
-        <div className="segmented view-toggle" role="group" aria-label="List layout">
-          {VIEW_TABS.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                className={`seg-btn ${view === tab.id ? "active" : ""}`}
-                onClick={() => onViewChange(tab.id)}
-                title={
-                  tab.id === "grouped"
-                    ? "Group requests by platform, most recently active first."
-                    : "Flat chronological list across all platforms."
-                }
-              >
-                <Icon size={11} />
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
+        <Segmented
+          ariaLabel="List layout"
+          className="view-toggle"
+          value={view}
+          options={[
+            {
+              id: "grouped",
+              label: (
+                <>
+                  <Layers size={11} />
+                  Platforms
+                </>
+              ),
+              title: "Group requests by platform, most recently active first.",
+            },
+            {
+              id: "history",
+              label: (
+                <>
+                  <History size={11} />
+                  History
+                </>
+              ),
+              title: "Flat chronological list across all platforms.",
+            },
+          ]}
+          onChange={onViewChange}
+        />
         <div className="event-select-wrap">
           <select
             className="event-select"

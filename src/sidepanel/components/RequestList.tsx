@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo, useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import type { MarketingRequest, Platform } from "../../core/types";
 import { PLATFORM_INFO } from "../../core/types";
 import { formatMoney, formatTimeShort, truncateMiddle } from "../../core/url";
@@ -55,16 +55,26 @@ function Row({
       <span className="row-main">
         <span className="row-title">
           <span className="row-event">{request.eventName ?? "Unknown request"}</span>
-          {value && <span className="row-value">{value}</span>}
+          {value && <span className="row-value num">{value}</span>}
         </span>
         <span className="row-sub">
-          {request.unknown
-            ? truncateMiddle(compactish(request.url), 46)
-            : `${PLATFORM_INFO[request.platform].shortLabel}${id ? ` · ${id}` : ""}`}
+          {request.unknown ? (
+            truncateMiddle(compactish(request.url), 46)
+          ) : (
+            <>
+              {PLATFORM_INFO[request.platform].shortLabel}
+              {id && (
+                <>
+                  {" · "}
+                  <span className="row-id num">{id}</span>
+                </>
+              )}
+            </>
+          )}
         </span>
       </span>
       <span className="row-side">
-        <span className="row-time">{formatTimeShort(request.timestamp)}</span>
+        <span className="row-time num">{formatTimeShort(request.timestamp)}</span>
       </span>
     </button>
   );
@@ -148,12 +158,11 @@ export const RequestList = memo(function RequestList({
             const { platform, count } = item.data;
             const info = PLATFORM_INFO[platform];
             const isCollapsed = collapsed.has(platform);
-            const Caret = isCollapsed ? ChevronRight : ChevronDown;
             return (
               <button
                 key={item.id}
                 type="button"
-                className="group-header"
+                className={`group-header ${isCollapsed ? "collapsed" : ""}`}
                 style={{ top, height: item.height }}
                 onClick={() => toggleGroup(platform)}
                 aria-expanded={!isCollapsed}
@@ -163,10 +172,10 @@ export const RequestList = memo(function RequestList({
                     : `Collapse ${info.label}`
                 }
               >
-                <Caret size={11} className="group-caret" />
-                <PlatformIcon platform={item.data.platform} size={13} />
+                <ChevronDown size={11} className="group-caret" />
+                <PlatformIcon platform={platform} size={13} />
                 <span className="group-label">{info.label}</span>
-                <span className="group-count">{count}</span>
+                <span className="group-count num">{count}</span>
               </button>
             );
           }
