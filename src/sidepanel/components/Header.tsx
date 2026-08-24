@@ -22,6 +22,8 @@ interface Props {
   onRefreshTab: () => void;
 }
 
+type StatusTone = "live" | "recording" | "paused";
+
 export function Header({
   requests,
   captureEnabled,
@@ -39,13 +41,26 @@ export function Header({
   const count = requests.length;
   const stamp = useMemo(() => new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-"), []);
 
-  const statusText = !captureEnabled
-    ? "capture paused"
-    : recordAllTabs
-      ? "recording all tabs"
-      : recordThisTab
-        ? "recording this tab"
-        : "capture-only";
+  const status: { label: string; tone: StatusTone; title: string } = !captureEnabled
+    ? {
+        label: "Paused",
+        tone: "paused",
+        title: "Capture is paused — requests are not being intercepted.",
+      }
+    : recordAllTabs || recordThisTab
+      ? {
+          label: "Recording",
+          tone: "recording",
+          title: recordAllTabs
+            ? "Recording all tabs — requests from every tab and site are kept until cleared."
+            : "Recording this tab — history is kept while you browse here; switching tabs clears the view.",
+        }
+      : {
+          label: "Capture-only",
+          tone: "live",
+          title:
+            "Capture-only: requests stream in live, but the list resets on navigation. Turn on a recording scope to keep history.",
+        };
 
   const doExport = (kind: "json" | "csv") => {
     const stampPart = stamp;
@@ -79,18 +94,24 @@ export function Header({
         </span>
         <div className="header-title">
           <span className="title-text">Network Decoder</span>
-          <span className="title-sub">
-            v1.5.0 · {count} request{count === 1 ? "" : "s"} · {statusText}
+          <span className="title-meta">
+            <span className={`status-pill ${status.tone}`} title={status.title}>
+              <span className="status-pill-dot" />
+              {status.label}
+            </span>
+            <span className="title-count num">
+              {count} request{count === 1 ? "" : "s"}
+            </span>
           </span>
         </div>
       </div>
 
       <div className="header-actions">
-        <span className="record-label">Record:</span>
-        <div className="segmented record-scope" role="group" aria-label="Recording scope">
+        <span className="record-label">Record</span>
+        <div className="record-scope" role="group" aria-label="Recording scope">
           <button
             type="button"
-            className={`seg-btn ${recordThisTab ? "active" : ""}`}
+            className={`record-toggle ${recordThisTab ? "on" : ""}`}
             onClick={() => onSetRecordScope(!recordThisTab, recordAllTabs)}
             aria-pressed={recordThisTab}
             title={
@@ -103,7 +124,7 @@ export function Header({
           </button>
           <button
             type="button"
-            className={`seg-btn ${recordAllTabs ? "active" : ""}`}
+            className={`record-toggle ${recordAllTabs ? "on" : ""}`}
             onClick={() => onSetRecordScope(recordThisTab, !recordAllTabs)}
             aria-pressed={recordAllTabs}
             title={

@@ -218,10 +218,64 @@ select {
   white-space: nowrap;
 }
 
-.title-sub {
+.title-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.title-count {
   font-size: 10.5px;
   color: var(--text-3);
-  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Status pill — one glance tells you what the panel is doing. */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 16px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 9.5px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.status-pill-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.status-pill.live {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.status-pill.recording {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+}
+
+.status-pill.recording .status-pill-dot {
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.status-pill.paused {
+  color: var(--text-3);
+  background: var(--surface-2);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
 
 .header-actions {
@@ -241,50 +295,47 @@ select {
   white-space: nowrap;
 }
 
-.record-btn {
+/* Record scope — two independent, non-exclusive toggles. */
+.record-scope {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 3px;
+  margin-right: 4px;
+}
+
+.record-toggle {
+  display: inline-flex;
+  align-items: center;
   height: 24px;
-  padding: 0 10px;
+  padding: 0 9px;
   border-radius: 999px;
   font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-weight: 550;
+  letter-spacing: 0.01em;
   border: 1px solid var(--border);
   background: var(--surface-2);
   color: var(--text-2);
   white-space: nowrap;
   cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  transition: background 0.15s cubic-bezier(0.3, 0, 0.4, 1),
+    color 0.15s cubic-bezier(0.3, 0, 0.4, 1),
+    border-color 0.15s cubic-bezier(0.3, 0, 0.4, 1);
 }
 
-.record-btn:hover {
+.record-toggle:hover {
   background: var(--surface-3);
+  color: var(--text);
 }
 
-.record-btn.live {
-  color: var(--danger);
-  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
-  background: color-mix(in srgb, var(--danger) 10%, transparent);
+.record-toggle:active {
+  transform: scale(0.97);
 }
 
-.record-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: currentColor;
-  flex-shrink: 0;
-}
-
-.record-dot.recording {
-  background: var(--danger);
-  animation: pulse 1.4s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+.record-toggle.on {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+  font-weight: 600;
 }
 
 .icon-btn {
@@ -454,10 +505,16 @@ select {
 
 .capture-toggle.on .capture-dot {
   background: var(--success);
+  animation: capture-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .capture-toggle.off .capture-dot {
   background: var(--danger);
+}
+
+@keyframes capture-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--success) 40%, transparent); }
+  50% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 12%, transparent); }
 }
 
 .search-box {
@@ -578,26 +635,47 @@ select {
 }
 
 .segmented {
-  display: inline-flex;
+  position: relative;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   align-items: center;
-  gap: 2px;
+  gap: 0;
   padding: 2px;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
+  isolation: isolate;
+}
+
+.segmented-thumb {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: calc((100% - 4px) / var(--n));
+  border-radius: 4px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transform: translateX(calc(var(--i) * 100%));
+  transition: transform 0.18s cubic-bezier(0.3, 0, 0.4, 1);
+  z-index: 0;
 }
 
 .seg-btn {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
   height: 20px;
-  padding: 0 7px;
+  padding: 0 8px;
   border-radius: 4px;
   font-size: 10.5px;
   font-weight: 550;
   color: var(--text-2);
-  transition: background 0.12s ease, color 0.12s ease;
+  transition: color 0.15s cubic-bezier(0.3, 0, 0.4, 1);
   white-space: nowrap;
 }
 
@@ -605,10 +683,13 @@ select {
   color: var(--text);
 }
 
+.seg-btn:active {
+  transform: scale(0.97);
+}
+
 .seg-btn.active {
-  background: var(--surface);
   color: var(--text);
-  box-shadow: var(--shadow-sm);
+  font-weight: 600;
 }
 
 .seg-count {
