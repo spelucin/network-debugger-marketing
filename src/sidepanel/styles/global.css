@@ -1009,6 +1009,74 @@ select {
   background: var(--accent-strong);
 }
 
+.empty-action:active {
+  transform: scale(0.97);
+}
+
+/* Onboarding steps for the live empty state. */
+.empty-steps {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 280px;
+}
+
+.empty-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.empty-step-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 9.5px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.empty-step-text {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-2);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.empty-step-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  transition: background 0.12s ease, transform 0.12s ease;
+}
+
+.empty-step-action:hover {
+  background: var(--accent-strong);
+}
+
+.empty-step-action:active {
+  transform: scale(0.97);
+}
+
 /* ------------------------------------------------------------
    Detail
    ------------------------------------------------------------ */
@@ -1708,6 +1776,49 @@ select {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* Toggle switch — track 34×18, knob 14, denim when on. */
+.switch {
+  position: relative;
+  width: 34px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  transition: background 0.16s cubic-bezier(0.3, 0, 0.4, 1),
+    border-color 0.16s cubic-bezier(0.3, 0, 0.4, 1);
+}
+
+.switch:hover {
+  border-color: var(--text-3);
+}
+
+.switch:active .switch-knob {
+  width: 16px;
+}
+
+.switch.on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.switch-knob {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.16s cubic-bezier(0.3, 0, 0.4, 1),
+    width 0.12s cubic-bezier(0.3, 0, 0.4, 1);
+}
+
+.switch.on .switch-knob {
+  transform: translateX(16px);
 }
 
 .setting-info {

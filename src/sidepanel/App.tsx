@@ -140,6 +140,7 @@ export function App() {
               captureEnabled={captureEnabled}
               recording={recordThisTab || recordAllTabs}
               onStart={() => setCapturing(true)}
+              onReload={handleRefreshTab}
             />
           ) : (
             <>

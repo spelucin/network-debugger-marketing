@@ -1,5 +1,7 @@
 import { X } from "lucide-react";
 import type { CaptureSettings } from "../../core/types";
+import { Switch } from "./Switch";
+import { Segmented } from "./Segmented";
 
 const WATCH_DOMAINS = [
   "google-analytics.com",
@@ -32,45 +34,37 @@ export function SettingsOverlay({ settings, onUpdate, onClose }: Props) {
         </div>
 
         <div className="settings-body">
-          <Setting label="Capture" hint="Network interception. Always on by default; pausing stops storing new requests.">
-            <div className="segmented" role="group">
-              <button
-                type="button"
-                className={`seg-btn ${settings.captureEnabled ? "active" : ""}`}
-                onClick={() => onUpdate({ captureEnabled: true })}
-              >
-                On
-              </button>
-              <button
-                type="button"
-                className={`seg-btn ${!settings.captureEnabled ? "active" : ""}`}
-                onClick={() => onUpdate({ captureEnabled: false })}
-              >
-                Off
-              </button>
-            </div>
+          <Setting
+            label="Capture"
+            hint="Network interception. Always on by default; pausing stops storing new requests."
+          >
+            <Switch
+              checked={settings.captureEnabled}
+              onChange={(v) => onUpdate({ captureEnabled: v })}
+              label="Capture network requests"
+            />
           </Setting>
 
           <Setting
-            label="Record"
-            hint="Both off = capture-only: requests stream in live, but the list resets on navigation. “This tab” keeps the current tab's history; “All tabs” keeps every tab's. They can be combined."
+            label="Record this tab"
+            hint="Keep the current tab's requests across reloads. Switching tabs clears the view."
           >
-            <div className="segmented record-scope" role="group">
-              <button
-                type="button"
-                className={`seg-btn ${settings.recordThisTab ? "active" : ""}`}
-                onClick={() => onUpdate({ recordThisTab: !settings.recordThisTab })}
-              >
-                This tab
-              </button>
-              <button
-                type="button"
-                className={`seg-btn ${settings.recordAllTabs ? "active" : ""}`}
-                onClick={() => onUpdate({ recordAllTabs: !settings.recordAllTabs })}
-              >
-                All tabs
-              </button>
-            </div>
+            <Switch
+              checked={settings.recordThisTab}
+              onChange={(v) => onUpdate({ recordThisTab: v })}
+              label="Record this tab"
+            />
+          </Setting>
+
+          <Setting
+            label="Record all tabs"
+            hint="Keep requests from every tab and site until cleared. Can be combined with This tab."
+          >
+            <Switch
+              checked={settings.recordAllTabs}
+              onChange={(v) => onUpdate({ recordAllTabs: v })}
+              label="Record all tabs"
+            />
           </Setting>
 
           <Setting label="Retained requests" hint="Older requests are dropped beyond this limit.">
@@ -79,7 +73,7 @@ export function SettingsOverlay({ settings, onUpdate, onClose }: Props) {
               min={100}
               max={100000}
               step={100}
-              className="number-input"
+              className="number-input num"
               value={settings.retainLimit}
               onChange={(e) => {
                 const n = Number(e.target.value);
@@ -89,18 +83,16 @@ export function SettingsOverlay({ settings, onUpdate, onClose }: Props) {
           </Setting>
 
           <Setting label="Theme" hint="Color scheme for the sidebar.">
-            <div className="segmented" role="group">
-              {(["system", "light", "dark"] as const).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  className={`seg-btn ${settings.theme === t ? "active" : ""}`}
-                  onClick={() => onUpdate({ theme: t })}
-                >
-                  {t === "system" ? "System" : t === "light" ? "Light" : "Dark"}
-                </button>
-              ))}
-            </div>
+            <Segmented
+              ariaLabel="Theme"
+              value={settings.theme}
+              options={[
+                { id: "system", label: "System" },
+                { id: "light", label: "Light" },
+                { id: "dark", label: "Dark" },
+              ]}
+              onChange={(theme) => onUpdate({ theme })}
+            />
           </Setting>
 
           <div className="settings-divider" />

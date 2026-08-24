@@ -1,40 +1,69 @@
-import { Play, WifiOff } from "lucide-react";
+import { Play, Radio, RotateCw, WifiOff } from "lucide-react";
 
 interface Props {
   captureEnabled: boolean;
   recording: boolean;
   onStart: () => void;
+  onReload: () => void;
 }
 
-export function EmptyState({ captureEnabled, recording, onStart }: Props) {
-  return (
-    <div className="empty-state">
-      <div className="empty-icon">
-        {captureEnabled ? (
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.4" />
-            <path d="M7 13l3 3 7-8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        ) : (
+/**
+ * Composed empty state. While live it doubles as onboarding: the three
+ * things a first-time user needs to do, in order, with the one actionable
+ * step (reload) as an inline button.
+ */
+export function EmptyState({ captureEnabled, recording, onStart, onReload }: Props) {
+  if (!captureEnabled) {
+    return (
+      <div className="empty-state">
+        <div className="empty-icon">
           <WifiOff size={22} />
-        )}
-      </div>
-      <div className="empty-title">
-        {captureEnabled ? "No requests yet" : "Capture is paused"}
-      </div>
-      <div className="empty-desc">
-        {captureEnabled
-          ? recording
-            ? "Nothing captured so far. If you opened the panel after the page loaded, reload this page (refresh button above) to capture all requests from page load."
-            : "Capture-only mode: the view starts fresh on every navigation. Turn on a recording scope (This tab / All tabs) to keep history, or reload this page (refresh button above) to capture from page load."
-          : "Turn capture on to start intercepting marketing requests."}
-      </div>
-      {!captureEnabled && (
+        </div>
+        <div className="empty-title">Capture is paused</div>
+        <div className="empty-desc">
+          Requests are not being intercepted. Turn capture back on to resume.
+        </div>
         <button type="button" className="empty-action" onClick={onStart}>
           <Play size={13} />
           Start capture
         </button>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="empty-state">
+      <div className="empty-icon">
+        <Radio size={22} />
+      </div>
+      <div className="empty-title">Listening for requests</div>
+      <ol className="empty-steps">
+        <li className="empty-step">
+          <span className="empty-step-marker num">1</span>
+          <span className="empty-step-text">
+            Reload this tab to capture everything from page load.
+            <button type="button" className="empty-step-action" onClick={onReload}>
+              <RotateCw size={11} />
+              Reload
+            </button>
+          </span>
+        </li>
+        <li className="empty-step">
+          <span className="empty-step-marker num">2</span>
+          <span className="empty-step-text">
+            Browse the site — decoded requests appear here as they fire.
+          </span>
+        </li>
+        {!recording && (
+          <li className="empty-step">
+            <span className="empty-step-marker num">3</span>
+            <span className="empty-step-text">
+              The list resets on navigation. Use Record in the header to keep
+              history.
+            </span>
+          </li>
+        )}
+      </ol>
     </div>
   );
 }

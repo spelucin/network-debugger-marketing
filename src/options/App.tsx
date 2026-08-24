@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import type { CaptureSettings } from "../core/types";
 import { DEFAULT_SETTINGS } from "../core/types";
 import { STORAGE_KEYS } from "../shared/messages";
+import { Switch } from "../sidepanel/components/Switch";
+import { Segmented } from "../sidepanel/components/Segmented";
 
 const WATCH_DOMAINS = [
   "google-analytics.com",
@@ -69,48 +71,45 @@ export function App() {
         <div className="options-row">
           <span>
             Capture network requests
-            <small>Always on by default; pausing stops storing new requests.</small>
+            <small>
+              Always on by default; pausing stops storing new requests.
+            </small>
           </span>
-          <div className="segmented" role="group">
-            <button
-              type="button"
-              className={`seg-btn ${settings.captureEnabled ? "active" : ""}`}
-              onClick={() => update({ captureEnabled: true })}
-            >
-              On
-            </button>
-            <button
-              type="button"
-              className={`seg-btn ${!settings.captureEnabled ? "active" : ""}`}
-              onClick={() => update({ captureEnabled: false })}
-            >
-              Off
-            </button>
-          </div>
+          <Switch
+            checked={settings.captureEnabled}
+            onChange={(v) => update({ captureEnabled: v })}
+            label="Capture network requests"
+          />
         </div>
 
         <h2>Record</h2>
         <div className="options-row">
           <span>
-            What the panel keeps on screen
-            <small>Options are not exclusive. Recording across all tabs keeps everything.</small>
+            This tab
+            <small>
+              Keep the current tab's requests across reloads. Switching tabs
+              clears the view.
+            </small>
           </span>
-          <div className="segmented record-scope" role="group">
-            <button
-              type="button"
-              className={`seg-btn ${settings.recordThisTab ? "active" : ""}`}
-              onClick={() => update({ recordThisTab: !settings.recordThisTab })}
-            >
-              This tab
-            </button>
-            <button
-              type="button"
-              className={`seg-btn ${settings.recordAllTabs ? "active" : ""}`}
-              onClick={() => update({ recordAllTabs: !settings.recordAllTabs })}
-            >
-              All tabs
-            </button>
-          </div>
+          <Switch
+            checked={settings.recordThisTab}
+            onChange={(v) => update({ recordThisTab: v })}
+            label="Record this tab"
+          />
+        </div>
+        <div className="options-row">
+          <span>
+            All tabs
+            <small>
+              Keep requests from every tab and site until cleared. Can be
+              combined with This tab.
+            </small>
+          </span>
+          <Switch
+            checked={settings.recordAllTabs}
+            onChange={(v) => update({ recordAllTabs: v })}
+            label="Record all tabs"
+          />
         </div>
 
         <div className="options-row">
@@ -123,7 +122,7 @@ export function App() {
             min={100}
             max={100000}
             step={100}
-            className="number-input"
+            className="number-input num"
             value={settings.retainLimit}
             onChange={(e) => {
               const n = Number(e.target.value);
@@ -136,18 +135,16 @@ export function App() {
 
         <div className="options-row">
           <span>Theme</span>
-          <div className="segmented" role="group">
-            {(["system", "light", "dark"] as const).map((t) => (
-              <button
-                key={t}
-                type="button"
-                className={`seg-btn ${settings.theme === t ? "active" : ""}`}
-                onClick={() => update({ theme: t })}
-              >
-                {t === "system" ? "System" : t === "light" ? "Light" : "Dark"}
-              </button>
-            ))}
-          </div>
+          <Segmented
+            ariaLabel="Theme"
+            value={settings.theme}
+            options={[
+              { id: "system", label: "System" },
+              { id: "light", label: "Light" },
+              { id: "dark", label: "Dark" },
+            ]}
+            onChange={(theme) => update({ theme })}
+          />
         </div>
 
         <h2>Watched domains</h2>
