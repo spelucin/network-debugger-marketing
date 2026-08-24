@@ -29,6 +29,31 @@ export function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [showSettings, setShowSettings] = useState(false);
+  const [navigating, setNavigating] = useState(false);
+
+  // Track the active tab's page loads: while a navigation is in flight and
+  // nothing has been captured yet, the panel shows an intermediate loading
+  // state instead of flashing the onboarding empty state.
+  useEffect(() => {
+    if (activeTabId === undefined) return;
+    const onUpdated = (tabId: number, info: chrome.tabs.TabChangeInfo) => {
+      if (tabId !== activeTabId) return;
+      if (info.status === "loading") setNavigating(true);
+      else if (info.status === "complete") setNavigating(false);
+    };
+    try {
+      chrome.tabs.onUpdated.addListener(onUpdated);
+    } catch {
+      // tabs API unavailable in some contexts; loading state is cosmetic.
+    }
+    return () => {
+      try {
+        chrome.tabs.onUpdated.removeListener(onUpdated);
+      } catch {
+        // ignore
+      }
+    };
+  }, [activeTabId]);
 
   // The panel reflects the current tab unless recording across all tabs. The
   // global list is never mutated, so recording keeps every tab's history.
@@ -36,6 +61,11 @@ export function App() {
     () => (recordAllTabs ? requests : filterByTab(requests, activeTabId)),
     [requests, recordAllTabs, activeTabId]
   );
+
+  // Mid-navigation with nothing captured yet: capture-only mode just wiped
+  // the view, so show the loading state rather than "no requests yet".
+  const showNavigating =
+    captureEnabled && navigating && visibleRequests.length === 0;
 
   // Theme: manual override or follow the system.
   useEffect(() => {
@@ -160,7 +190,9 @@ export function App() {
             view={settings.listView}
             onViewChange={(view: ListView) => updateSettings({ listView: view })}
           />
-          {visibleRequests.length === 0 ? (
+          {showNavigating ? (
+            <NavigatingState />
+          ) : visibleRequests.length === 0 ? (
             <EmptyState
               captureEnabled={captureEnabled}
               recording={recordThisTab || recordAllTabs}
@@ -190,6 +222,29 @@ export function App() {
           onClose={() => setShowSettings(false)}
         />
       )}
+    </div>
+  );
+}
+/** Intermediate state while the active tab loads and capture-only mode has
+ * just wiped the view: shimmer rows hint at the list that may arrive. */
+function NavigatingState() {
+  return (
+    <div className="navigating-state" aria-live="polite" aria-label="Page loading">
+      <div className="navigating-caption">
+        <span className="navigating-dot" />
+        Waiting for requests from this page…
+      </div>
+      <div className="navigating-rows">
+        {Array.from({ length: 5 }, (_, i) => (
+          <div key={i} className="skeleton-row" style={{ animationDelay: `${i * 70}ms` }}>
+            <span className="skeleton-badge" />
+            <span className="skeleton-lines">
+              <span className="skeleton-line" style={{ width: `${58 - (i % 3) * 8}%` }} />
+              <span className="skeleton-line thin" style={{ width: `${36 + (i % 4) * 9}%` }} />
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
