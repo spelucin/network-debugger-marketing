@@ -30,6 +30,7 @@ function ParamRow({ param }: { param: Parameter }) {
         <span className="param-name" title={param.key}>
           {param.label}
         </span>
+        {param.type && <TypeBadge type={param.type} />}
         {param.key !== param.label && <span className="param-key">{param.key}</span>}
         {(param.description || param.documentationUrl) && (
           <InfoTip
@@ -84,4 +85,19 @@ function ValueText({ param }: { param: Parameter }) {
 
 function isMonoType(type?: ParameterType): boolean {
   return type === "id" || type === "timestamp" || type === "number";
+}
+
+/** Compact type chip — only for types that carry real meaning. Plain
+ * strings stay unbadged to keep the rows quiet. */
+const BADGED_TYPES = new Set<ParameterType>([
+  "id",
+  "currency",
+  "json",
+  "timestamp",
+  "boolean",
+]);
+
+function TypeBadge({ type }: { type: ParameterType }) {
+  if (!BADGED_TYPES.has(type)) return null;
+  return <span className={`type-badge type-${type}`}>{type}</span>;
 }

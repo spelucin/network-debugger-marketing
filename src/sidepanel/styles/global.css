@@ -1101,8 +1101,8 @@ select {
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
   border-radius: var(--radius-md);
 }
 
@@ -1111,6 +1111,7 @@ select {
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent);
 }
 
 .entity-text {
@@ -1129,6 +1130,7 @@ select {
 .entity-id {
   font-size: 13px;
   color: var(--text);
+  letter-spacing: -0.01em;
 }
 
 /* Unknown card */
@@ -1223,6 +1225,38 @@ select {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Type chips — quiet, square, only on meaningful types. */
+.type-badge {
+  flex-shrink: 0;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--text-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.type-badge.type-currency {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 9%, transparent);
+  border-color: color-mix(in srgb, var(--success) 25%, transparent);
+}
+
+.type-badge.type-id {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+}
+
+.type-badge.type-json {
+  color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 10%, transparent);
+  border-color: color-mix(in srgb, var(--warn) 28%, transparent);
 }
 
 .param-value {

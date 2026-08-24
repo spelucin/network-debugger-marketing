@@ -9,6 +9,7 @@ import { ParamSection } from "./ParamSection";
 import { EcommerceSection } from "./EcommerceSection";
 import { RawSection } from "./RawSection";
 import { CopyButton } from "./CopyButton";
+import { Segmented } from "./Segmented";
 
 interface Props {
   request: MarketingRequest;
@@ -60,22 +61,15 @@ export function Detail({ request, onBack }: Props) {
       </div>
 
       <div className="detail-toolbar">
-        <div className="segmented" role="group" aria-label="View mode">
-          <button
-            type="button"
-            className={`seg-btn ${mode === "decoded" ? "active" : ""}`}
-            onClick={() => setMode("decoded")}
-          >
-            Decoded
-          </button>
-          <button
-            type="button"
-            className={`seg-btn ${mode === "raw" ? "active" : ""}`}
-            onClick={() => setMode("raw")}
-          >
-            Raw
-          </button>
-        </div>
+        <Segmented
+          ariaLabel="View mode"
+          value={mode}
+          options={[
+            { id: "decoded", label: "Decoded" },
+            { id: "raw", label: "Raw" },
+          ]}
+          onChange={setMode}
+        />
         {decoded && (
           <CopyButton getText={copyParams} label="Copy decoded parameters" className="toolbar-copy" />
         )}
