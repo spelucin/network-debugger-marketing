@@ -262,7 +262,7 @@ body {
     animation: none;
   }
 
-  .status-pill.recording .status-pill-dot,
+  .status-pill.all .status-pill-dot,
   .capture-toggle.on .capture-dot {
     animation: none;
   }
@@ -328,8 +328,11 @@ select {
 
 .brand-mark {
   display: inline-flex;
-  color: var(--accent);
   flex-shrink: 0;
+}
+
+.brand-mark img {
+  display: block;
 }
 
 /* Official platform marks rendered favicon-style: native artwork on a
@@ -383,7 +386,9 @@ select {
   white-space: nowrap;
 }
 
-/* Status pill — the single record control. Click opens the scope menu. */
+/* Status pill — the single record control. Click opens the scope menu.
+   The label names the active scope so the mode is readable at a glance,
+   and each mode carries its own color. */
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -395,6 +400,7 @@ select {
   font-weight: 650;
   letter-spacing: 0.03em;
   white-space: nowrap;
+  flex-shrink: 0;
   border: 1px solid transparent;
   transition: background 0.15s cubic-bezier(0.3, 0, 0.4, 1),
     border-color 0.15s cubic-bezier(0.3, 0, 0.4, 1);
@@ -432,12 +438,19 @@ select {
   background: var(--accent-soft);
 }
 
-.status-pill.recording {
+/* Recording this tab: steady green dot. */
+.status-pill.tab {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+}
+
+/* Recording all tabs: pulsing red dot, the loudest scope. */
+.status-pill.all {
   color: var(--danger);
   background: color-mix(in srgb, var(--danger) 12%, transparent);
 }
 
-.status-pill.recording .status-pill-dot {
+.status-pill.all .status-pill-dot {
   animation: pulse 1.4s ease-in-out infinite;
 }
 
@@ -522,6 +535,23 @@ select {
 .icon-btn.danger:hover {
   background: color-mix(in srgb, var(--danger) 12%, transparent);
   color: var(--danger);
+}
+
+/* Narrow side panel: the wordmark goes first so the scope pill and the
+   action buttons keep their full labels instead of cramming. */
+@media (max-width: 359px) {
+  .app-header {
+    gap: 6px;
+    padding: 0 8px;
+  }
+
+  .title-text {
+    display: none;
+  }
+
+  .header-actions {
+    gap: 2px;
+  }
 }
 
 /* Menu */

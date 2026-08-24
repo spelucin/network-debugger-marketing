@@ -24,7 +24,7 @@ interface Props {
   onRefreshTab: () => void;
 }
 
-type StatusTone = "live" | "recording" | "paused";
+type StatusTone = "live" | "tab" | "all" | "paused";
 
 export function Header({
   requests,
@@ -48,22 +48,29 @@ export function Header({
     ? {
         label: "Paused",
         tone: "paused",
-        title: "Capture is paused — requests are not being intercepted.",
+        title: "Capture is paused, so requests are not being recorded.",
       }
-    : recordAllTabs || recordThisTab
+    : recordAllTabs
       ? {
-          label: "Recording",
-          tone: "recording",
-          title: recordAllTabs
-            ? "Recording all tabs — requests from every tab and site are kept until cleared."
-            : "Recording this tab — history is kept while you browse here; switching tabs clears the view.",
+          label: "All tabs",
+          tone: "all",
+          title: recordThisTab
+            ? "Recording all tabs and this tab. Requests from every tab are kept until you clear them."
+            : "Recording all tabs. Requests from every tab and site are kept until you clear them.",
         }
-      : {
-          label: "Live",
-          tone: "live",
-          title:
-            "Capture-only: requests stream in live, but the list resets on navigation. Click to keep history.",
-        };
+      : recordThisTab
+        ? {
+            label: "This tab",
+            tone: "tab",
+            title:
+              "Recording this tab. History is kept while you browse here and clears when you switch tabs.",
+          }
+        : {
+            label: "Live",
+            tone: "live",
+            title:
+              "Live capture. Requests stream in but the list resets on navigation. Click to keep history.",
+          };
 
   const doExport = (kind: "json" | "csv") => {
     const stampPart = stamp;
@@ -87,13 +94,7 @@ export function Header({
     <header className="app-header">
       <div className="header-left">
         <span className="brand-mark" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M4 18 9 12l4 4 7-9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            <circle cx="4" cy="18" r="1.6" fill="currentColor" />
-            <circle cx="9" cy="12" r="1.6" fill="currentColor" />
-            <circle cx="13" cy="16" r="1.6" fill="currentColor" />
-            <circle cx="20" cy="7" r="1.6" fill="currentColor" />
-          </svg>
+          <img src="icons/icon-32.png" width={16} height={16} alt="" />
         </span>
         <span className="title-text">Network Decoder</span>
 
@@ -123,7 +124,7 @@ export function Header({
                   <div className="record-menu-text">
                     <div className="record-menu-title">This tab</div>
                     <div className="record-menu-hint">
-                      Keeps this tab's requests across reloads; switching tabs clears the view.
+                      Keep this tab&apos;s requests across reloads. Switching tabs clears the view.
                     </div>
                   </div>
                   <Switch
@@ -136,7 +137,7 @@ export function Header({
                   <div className="record-menu-text">
                     <div className="record-menu-title">All tabs</div>
                     <div className="record-menu-hint">
-                      Keeps requests from every tab and site until cleared.
+                      Keep requests from every tab and site until you clear them.
                     </div>
                   </div>
                   <Switch
@@ -146,8 +147,8 @@ export function Header({
                   />
                 </div>
                 <div className="record-menu-footnote">
-                  Scopes can be combined. Both off = capture-only: the list
-                  resets on navigation.
+                  You can turn on both scopes. With both off, the list resets
+                  on every navigation.
                 </div>
               </div>
             </>
