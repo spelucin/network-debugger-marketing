@@ -83,7 +83,11 @@ export const MetaParser: MarketingParser = {
   canParse(request: RawRequest): boolean {
     const url = safeUrl(request.url);
     if (!url) return false;
-    if (isFacebookHost(url.hostname) && url.pathname === "/tr/") return true;
+    // The pixel fires both /tr and /tr/ (and /tr?…, whose pathname is /tr) —
+    // requiring the trailing slash missed most real traffic.
+    if (isFacebookHost(url.hostname) && (url.pathname === "/tr" || url.pathname === "/tr/")) {
+      return true;
+    }
     if (url.hostname === "graph.facebook.com" && /^\/(?:v\d+\.\d+\/)?\d+\/events/.test(url.pathname)) {
       return true;
     }
@@ -92,7 +96,13 @@ export const MetaParser: MarketingParser = {
 
   parse(request: RawRequest): DecodedEvent {
     const url = safeUrl(request.url);
-    const q = request.queryParams;
+    // fbevents sends most pixel params as a form-encoded POST body; the
+    // query string carries only a subset. Merge both — query wins.
+    const bodyParams =
+      isPlainObject(request.body) && !Array.isArray(request.body)
+        ? (request.body as Record<string, string | string[]>)
+        : {};
+    const q: Record<string, string | string[]> = { ...bodyParams, ...request.queryParams };
 
     // --- Server-side Conversions API style (graph.facebook.com/.../events) ---
     if (url?.hostname === "graph.facebook.com") {

@@ -11,6 +11,19 @@ describe("MetaParser.canParse", () => {
     expect(MetaParser.canParse(r)).toBe(true);
   });
 
+  it("accepts the bare /tr path most real pixels fire", () => {
+    const r = rawRequest(
+      "https://www.facebook.com/tr?id=123456789&ev=PageView",
+      { queryParams: queryParams("id=123456789&ev=PageView") }
+    );
+    expect(MetaParser.canParse(r)).toBe(true);
+  });
+
+  it("accepts bare /tr even with no query params at all", () => {
+    expect(MetaParser.canParse(rawRequest("https://www.facebook.com/tr"))).toBe(true);
+    expect(MetaParser.canParse(rawRequest("https://web.facebook.com/tr/"))).toBe(true);
+  });
+
   it("accepts graph.facebook.com CAPI events", () => {
     const r = rawRequest("https://graph.facebook.com/v18.0/123456789/events", {
       method: "POST",
@@ -24,6 +37,12 @@ describe("MetaParser.canParse", () => {
       queryParams: queryParams("id=123&ev=PageView"),
     });
     expect(MetaParser.canParse(r)).toBe(false);
+  });
+
+  it("rejects deeper facebook paths", () => {
+    expect(
+      MetaParser.canParse(rawRequest("https://www.facebook.com/tr/x?id=1"))
+    ).toBe(false);
   });
 });
 
@@ -79,6 +98,37 @@ describe("MetaParser.parse — client-side /tr/", () => {
 
     expect(d.eventName).toBe("AddToCart");
     expect(d.ecommerce!.items[0]!.item_id).toBe("sku-1");
+  });
+
+  it("decodes a form-encoded POST body (fbevents default transport)", () => {
+    const bodyText =
+      "id=123456789&ev=Purchase&cd[value]=89.00&cd[currency]=EUR" +
+      "&cd[content_ids]=sku-7&dl=https%3A%2F%2Fshop.com%2Fthanks";
+    const r = rawRequest("https://www.facebook.com/tr", {
+      method: "POST",
+      body: queryParams(bodyText),
+      bodyText,
+    });
+    const d = MetaParser.parse(r);
+
+    expect(d.platform).toBe("meta");
+    expect(d.eventName).toBe("Purchase");
+    expect(d.meta.pixelId).toBe("123456789");
+    expect(d.meta.documentLocation).toBe("https://shop.com/thanks");
+    expect(d.ecommerce!.value).toBe(89);
+    expect(d.ecommerce!.currency).toBe("EUR");
+    expect(d.ecommerce!.items[0]!.item_id).toBe("sku-7");
+  });
+
+  it("lets query params win over body params on conflict", () => {
+    const bodyText = "id=111&ev=PageView";
+    const r = rawRequest("https://www.facebook.com/tr?id=222&ev=PageView", {
+      method: "POST",
+      body: queryParams(bodyText),
+      bodyText,
+      queryParams: queryParams("id=222&ev=PageView"),
+    });
+    expect(MetaParser.parse(r).meta.pixelId).toBe("222");
   });
 });
 
