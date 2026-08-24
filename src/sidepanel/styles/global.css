@@ -1,75 +1,96 @@
 /* ============================================================
    Network Decoder — design system
    A compact, editor-grade developer tool. Light & dark themes.
+   Type: Geist + Geist Mono (variable, self-hosted).
+   Accent: denim blue. One accent, cool neutrals, tabular numerals.
    ============================================================ */
+
+@font-face {
+  font-family: "Geist Variable";
+  src: url("/fonts/GeistVF.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono Variable";
+  src: url("/fonts/GeistMonoVF.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   color-scheme: light;
 
-  --bg: #f6f6f7;
+  --bg: #f4f5f7;
   --surface: #ffffff;
-  --surface-2: #f0f0f2;
-  --surface-3: #e9e9ec;
+  --surface-2: #eef0f3;
+  --surface-3: #e5e8ed;
 
-  --border: #e4e4e7;
-  --border-strong: #d3d3d8;
+  --border: #e2e5ea;
+  --border-strong: #ccd2da;
 
-  --text: #1b1b1f;
-  --text-2: #5b5b65;
-  --text-3: #92929d;
+  --text: #191b1f;
+  --text-2: #565b66;
+  --text-3: #8b909c;
 
-  --accent: #5b5bd6;
-  --accent-strong: #4747c4;
-  --accent-soft: rgba(91, 91, 214, 0.1);
-  --accent-border: rgba(91, 91, 214, 0.35);
+  --accent: #2e6bc6;
+  --accent-strong: #2456a3;
+  --accent-soft: rgba(46, 107, 198, 0.1);
+  --accent-border: rgba(46, 107, 198, 0.35);
 
-  --success: #188a63;
-  --warn: #b45309;
-  --danger: #d0342c;
-  --info: #2563eb;
+  --success: #177a52;
+  --warn: #995c07;
+  --danger: #c0362c;
+  --info: #2563c9;
 
-  --code-bg: #f2f2f4;
-  --shadow-sm: 0 1px 2px rgba(16, 16, 24, 0.06);
-  --shadow-md: 0 8px 24px rgba(16, 16, 24, 0.14);
+  --code-bg: #f1f2f5;
+  --shadow-sm: 0 1px 2px rgba(20, 32, 54, 0.07);
+  --shadow-md: 0 10px 28px rgba(20, 32, 54, 0.16);
+  --shadow-lg: 0 18px 48px rgba(20, 32, 54, 0.22);
 
-  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono",
-    Menlo, Consolas, monospace;
+  --font-ui: "Geist Variable", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", "Cascadia Code",
+    "JetBrains Mono", Menlo, Consolas, monospace;
 
   --radius-sm: 6px;
-  --radius-md: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
   --row-h: 54px;
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: #131316;
-  --surface: #1b1b1f;
-  --surface-2: #232327;
-  --surface-3: #2b2b30;
+  --bg: #0f1013;
+  --surface: #17181c;
+  --surface-2: #1f2126;
+  --surface-3: #282b31;
 
-  --border: #2a2a2f;
-  --border-strong: #3a3a41;
+  --border: #26282e;
+  --border-strong: #3a3e46;
 
-  --text: #ededf0;
-  --text-2: #a2a2ac;
-  --text-3: #6e6e78;
+  --text: #eceef1;
+  --text-2: #a3a8b3;
+  --text-3: #6b7180;
 
-  --accent: #7c7cf0;
-  --accent-strong: #9494f5;
-  --accent-soft: rgba(124, 124, 240, 0.14);
-  --accent-border: rgba(124, 124, 240, 0.4);
+  --accent: #6f9fe8;
+  --accent-strong: #8fb6f0;
+  --accent-soft: rgba(111, 159, 232, 0.14);
+  --accent-border: rgba(111, 159, 232, 0.42);
 
-  --success: #3ecf8e;
-  --warn: #e8a13d;
-  --danger: #f07167;
-  --info: #6ea8fe;
+  --success: #4cc38a;
+  --warn: #e0a458;
+  --danger: #ef7a72;
+  --info: #79aaf3;
 
-  --code-bg: #101014;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 8px 28px rgba(0, 0, 0, 0.55);
+  --code-bg: #0c0d10;
+  --shadow-sm: 0 1px 2px rgba(2, 6, 14, 0.5);
+  --shadow-md: 0 10px 30px rgba(2, 6, 14, 0.6);
+  --shadow-lg: 0 18px 52px rgba(2, 6, 14, 0.7);
 }
 
 * {
@@ -92,6 +113,17 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow: hidden;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+/* Numeric data renders in mono with tabular figures everywhere. */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
 button {
