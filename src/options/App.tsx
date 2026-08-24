@@ -54,7 +54,7 @@ export function App() {
       <div className="options-card">
         <h1>Network Decoder</h1>
         <p className="options-tag">
-          Marketing network request decoder · v1.5.0
+          Marketing request debugger · v1.5.0
         </p>
 
         <h2>Capture</h2>
@@ -62,7 +62,7 @@ export function App() {
           <span>
             Capture network requests
             <small>
-              Always on by default; pausing stops storing new requests.
+              On by default. When paused, new requests are not stored.
             </small>
           </span>
           <Switch
@@ -91,8 +91,8 @@ export function App() {
           <span>
             All tabs
             <small>
-              Keep requests from every tab and site until cleared. Can be
-              combined with This tab.
+              Keep requests from every tab and site until you clear them. You
+              can combine this with This tab.
             </small>
           </span>
           <Switch
@@ -152,9 +152,9 @@ export function App() {
 
         <h2>Privacy</h2>
         <p className="options-body">
-          Captured network data stays in your browser and is not sent to a server.
-          No analytics, no telemetry, no accounts. Everything — parsing and
-          decoding — runs locally.
+          Captured network data stays in your browser and is never sent to a
+          server. There are no analytics, no telemetry, and no accounts.
+          Parsing and decoding all run locally.
         </p>
       </div>
     </div>

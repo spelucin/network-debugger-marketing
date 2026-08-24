@@ -26,7 +26,7 @@ export function SettingsOverlay({ settings, onUpdate, onClose }: Props) {
         <div className="settings-body">
           <Setting
             label="Capture"
-            hint="Network interception. Always on by default; pausing stops storing new requests."
+            hint="On by default. When paused, new requests are not stored."
           >
             <Switch
               checked={settings.captureEnabled}
@@ -48,7 +48,7 @@ export function SettingsOverlay({ settings, onUpdate, onClose }: Props) {
 
           <Setting
             label="Record all tabs"
-            hint="Keep requests from every tab and site until cleared. Can be combined with This tab."
+            hint="Keep requests from every tab and site until you clear them. You can combine this with This tab."
           >
             <Switch
               checked={settings.recordAllTabs}
@@ -87,7 +87,7 @@ export function SettingsOverlay({ settings, onUpdate, onClose }: Props) {
 
           <div className="settings-divider" />
 
-          <Setting label="Watched domains" hint="Only these hosts are observed. Nothing else is touched.">
+          <Setting label="Watched domains" hint="Only these hosts are observed. No other traffic is read.">
             <div className="domain-list">
               {WATCH_DOMAINS.map((d) => (
                 <span key={d} className="domain-chip">
@@ -102,19 +102,17 @@ export function SettingsOverlay({ settings, onUpdate, onClose }: Props) {
           <div className="privacy-note">
             <div className="privacy-title">Privacy</div>
             <p>
-              Captured network data stays in your browser and is not sent to a
-              server. No analytics, no telemetry, no accounts.
+              Captured network data stays in your browser and is never sent to
+              a server. There are no analytics, no telemetry, and no accounts.
             </p>
             <p>
-              Everything — parsing and decoding — runs locally. Requests are
-              only read from the marketing domains listed above while capture is
+              Parsing and decoding all run locally. Requests are read only from
+              the marketing domains listed above, and only while capture is
               enabled.
             </p>
           </div>
 
-          <div className="about-note">
-            Network Decoder v1.5.0 · a marketing network request decoder.
-          </div>
+          <div className="about-note">Network Decoder v1.5.0</div>
         </div>
       </div>
     </div>

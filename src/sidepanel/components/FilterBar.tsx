@@ -39,8 +39,8 @@ export function FilterBar({
           aria-pressed={captureEnabled}
           title={
             captureEnabled
-              ? "Capture is on — every matching request is intercepted and decoded. Click to pause."
-              : "Capture is paused — requests are not intercepted. Click to resume."
+              ? "Capture is on. Matching requests are intercepted and decoded. Click to pause."
+              : "Capture is paused and requests are not intercepted. Click to resume."
           }
         >
           <span className={`capture-dot ${captureEnabled ? "on" : "off"}`} />
@@ -48,8 +48,8 @@ export function FilterBar({
         </button>
         <span className="capture-hint">
           {captureEnabled
-            ? "Watches traffic live — the list resets on navigation unless recording is on."
-            : "Paused — no requests are being intercepted."}
+            ? "Watching live. The list resets on navigation unless recording is on."
+            : "Paused. No requests are being intercepted."}
         </span>
       </div>
 

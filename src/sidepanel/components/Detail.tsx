@@ -44,8 +44,8 @@ export function Detail({ request, onBack }: Props) {
           type="button"
           className="icon-btn"
           onClick={onBack}
-          title="Back to timeline"
-          aria-label="Back to timeline"
+          title="Back to list"
+          aria-label="Back to list"
         >
           <ArrowLeft size={15} />
         </button>
@@ -103,8 +103,8 @@ function DetailDecoded({ request }: { request: MarketingRequest }) {
           <div>
             <div className="unknown-title">Unknown request</div>
             <div className="unknown-desc">
-              We detected a network request but don&apos;t currently recognize its
-              platform. Use the Raw view to inspect it.
+              This request was captured, but its platform is not recognized
+              yet. Open the Raw view to inspect it.
             </div>
           </div>
           <span className="unknown-url">{compactUrl(request.url, 40)}</span>

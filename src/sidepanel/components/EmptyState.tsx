@@ -21,7 +21,7 @@ export function EmptyState({ captureEnabled, recording, onStart, onReload }: Pro
         </div>
         <div className="empty-title">Capture is paused</div>
         <div className="empty-desc">
-          Requests are not being intercepted. Turn capture back on to resume.
+          Requests are not being recorded. Turn capture back on to resume.
         </div>
         <button type="button" className="empty-action" onClick={onStart}>
           <Play size={13} />
@@ -51,15 +51,15 @@ export function EmptyState({ captureEnabled, recording, onStart, onReload }: Pro
         <li className="empty-step">
           <span className="empty-step-marker num">2</span>
           <span className="empty-step-text">
-            Browse the site — decoded requests appear here as they fire.
+            Browse the site and decoded requests appear here as they fire.
           </span>
         </li>
         {!recording && (
           <li className="empty-step">
             <span className="empty-step-marker num">3</span>
             <span className="empty-step-text">
-              The list resets on navigation. Use Record in the header to keep
-              history.
+              The list resets on navigation. Turn on recording in the header to
+              keep history.
             </span>
           </li>
         )}

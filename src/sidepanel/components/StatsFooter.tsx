@@ -11,7 +11,7 @@ export function StatsFooter({ perf }: Props) {
     <footer className="stats-footer" aria-label="Capture throughput">
       {perf.observed.toLocaleString()} observed · {perf.matched.toLocaleString()}{" "}
       matched
-      {perf.avgMs > 0 && <> · {perf.avgMs} ms avg classify</>}
+      {perf.avgMs > 0 && <> · {perf.avgMs} ms avg classify time</>}
     </footer>
   );
 }
