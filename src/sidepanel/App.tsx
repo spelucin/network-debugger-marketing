@@ -18,6 +18,7 @@ export function App() {
     recordThisTab,
     recordAllTabs,
     activeTabId,
+    ready,
     setCapturing,
     setRecordScope,
     updateSettings,
@@ -109,6 +110,30 @@ export function App() {
     }
     reloadActiveTab();
   }, [activeTabId, clearTab, reloadActiveTab]);
+
+  // First paint while the worker hydrates: a skeleton shaped like the list,
+  // so the panel never flashes an empty state that isn't real.
+  if (!ready) {
+    return (
+      <div className="app">
+        <div className="skeleton-header">
+          <span className="skeleton-line" style={{ width: 96 }} />
+          <span className="skeleton-line" style={{ width: 56 }} />
+        </div>
+        <div className="skeleton-list" aria-label="Loading captured requests">
+          {Array.from({ length: 9 }, (_, i) => (
+            <div key={i} className="skeleton-row" style={{ animationDelay: `${i * 70}ms` }}>
+              <span className="skeleton-badge" />
+              <span className="skeleton-lines">
+                <span className="skeleton-line" style={{ width: `${62 - (i % 3) * 9}%` }} />
+                <span className="skeleton-line thin" style={{ width: `${40 + (i % 4) * 8}%` }} />
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app">

@@ -34,7 +34,7 @@
 
   --text: #191b1f;
   --text-2: #565b66;
-  --text-3: #8b909c;
+  --text-3: #6b7078;
 
   --accent: #2e6bc6;
   --accent-strong: #2456a3;
@@ -74,8 +74,8 @@
   --border-strong: #3a3e46;
 
   --text: #eceef1;
-  --text-2: #a3a8b3;
-  --text-3: #6b7180;
+  --text-2: #a6abb6;
+  --text-3: #7e8492;
 
   --accent: #6f9fe8;
   --accent-strong: #8fb6f0;
@@ -124,6 +124,118 @@ body {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
+}
+
+/* ------------------------------------------------------------
+   Loading skeleton — first paint while the worker hydrates.
+   ------------------------------------------------------------ */
+
+.skeleton-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 46px;
+  padding: 0 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.skeleton-list {
+  flex: 1;
+  padding: 6px 0;
+  background: var(--bg);
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--row-h);
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+  opacity: 0;
+  animation: skeleton-in 0.4s cubic-bezier(0.3, 0, 0.4, 1) forwards;
+}
+
+.skeleton-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.skeleton-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.skeleton-line {
+  display: block;
+  height: 9px;
+  border-radius: 4px;
+}
+
+.skeleton-line.thin {
+  height: 7px;
+}
+
+.skeleton-badge,
+.skeleton-line {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    var(--surface-3) 45%,
+    var(--surface-2) 65%
+  );
+  background-size: 240% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 120% 0; }
+  100% { background-position: -120% 0; }
+}
+
+@keyframes skeleton-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ------------------------------------------------------------
+   Reduced motion — every animation collapses to static.
+   ------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .skeleton-row {
+    opacity: 1;
+    transform: none;
+  }
+
+  .skeleton-badge,
+  .skeleton-line {
+    animation: none;
+  }
+
+  .status-pill.recording .status-pill-dot,
+  .capture-toggle.on .capture-dot {
+    animation: none;
+  }
+
+  .segmented-thumb {
+    transition: none;
+  }
 }
 
 button {
@@ -619,6 +731,9 @@ select {
 }
 
 .chip-count {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 10px;
   font-weight: 550;
   color: var(--text-3);
 }
@@ -702,7 +817,9 @@ select {
 }
 
 .seg-count {
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+  font-size: 10px;
   font-weight: 500;
   color: var(--text-3);
 }
