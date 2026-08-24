@@ -349,19 +349,29 @@ select {
   white-space: nowrap;
 }
 
-/* Status pill — one glance tells you what the panel is doing. */
+/* Status pill — the single record control. Click opens the scope menu. */
 .status-pill {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  height: 16px;
+  height: 20px;
   padding: 0 7px;
   border-radius: 999px;
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 650;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   white-space: nowrap;
-  cursor: default;
+  border: 1px solid transparent;
+  transition: background 0.15s cubic-bezier(0.3, 0, 0.4, 1),
+    border-color 0.15s cubic-bezier(0.3, 0, 0.4, 1);
+}
+
+.status-pill:hover {
+  border-color: currentColor;
+}
+
+.status-pill:active {
+  transform: scale(0.97);
 }
 
 .status-pill-dot {
@@ -370,6 +380,17 @@ select {
   border-radius: 50%;
   background: currentColor;
   flex-shrink: 0;
+}
+
+.status-pill-count {
+  padding-left: 4px;
+  border-left: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  font-weight: 600;
+}
+
+.status-pill-caret {
+  flex-shrink: 0;
+  opacity: 0.7;
 }
 
 .status-pill.live {
@@ -386,14 +407,54 @@ select {
   animation: pulse 1.4s ease-in-out infinite;
 }
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
 .status-pill.paused {
   color: var(--text-3);
   background: var(--surface-2);
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+/* Record scope popover, anchored to the status pill. */
+.record-menu {
+  width: 240px;
+  left: 0;
+  right: auto;
+}
+
+.record-menu-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.record-menu-text {
+  min-width: 0;
+}
+
+.record-menu-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.record-menu-hint {
+  margin-top: 2px;
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--text-3);
+}
+
+.record-menu-footnote {
+  padding: 8px 12px;
+  font-size: 10px;
+  line-height: 1.45;
+  color: var(--text-3);
 }
 
 .header-actions {
@@ -401,59 +462,6 @@ select {
   align-items: center;
   gap: 4px;
   flex-shrink: 0;
-}
-
-.record-label {
-  margin-right: 2px;
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-3);
-  white-space: nowrap;
-}
-
-/* Record scope — two independent, non-exclusive toggles. */
-.record-scope {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  margin-right: 4px;
-}
-
-.record-toggle {
-  display: inline-flex;
-  align-items: center;
-  height: 24px;
-  padding: 0 9px;
-  border-radius: 999px;
-  font-size: 10.5px;
-  font-weight: 550;
-  letter-spacing: 0.01em;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--text-2);
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background 0.15s cubic-bezier(0.3, 0, 0.4, 1),
-    color 0.15s cubic-bezier(0.3, 0, 0.4, 1),
-    border-color 0.15s cubic-bezier(0.3, 0, 0.4, 1);
-}
-
-.record-toggle:hover {
-  background: var(--surface-3);
-  color: var(--text);
-}
-
-.record-toggle:active {
-  transform: scale(0.97);
-}
-
-.record-toggle.on {
-  color: var(--accent);
-  border-color: var(--accent-border);
-  background: var(--accent-soft);
-  font-weight: 600;
 }
 
 .icon-btn {

@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import {
+  ChevronDown,
   Download,
   RotateCw,
   Settings,
@@ -9,6 +10,7 @@ import {
 } from "lucide-react";
 import type { MarketingRequest } from "../../core/types";
 import { buildCsvExport, buildJsonExport, downloadFile } from "../lib/export";
+import { Switch } from "./Switch";
 
 interface Props {
   requests: MarketingRequest[];
@@ -36,6 +38,7 @@ export function Header({
   onRefreshTab,
 }: Props) {
   const [exportOpen, setExportOpen] = useState(false);
+  const [recordOpen, setRecordOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const count = requests.length;
@@ -56,10 +59,10 @@ export function Header({
             : "Recording this tab — history is kept while you browse here; switching tabs clears the view.",
         }
       : {
-          label: "Capture-only",
+          label: "Live",
           tone: "live",
           title:
-            "Capture-only: requests stream in live, but the list resets on navigation. Turn on a recording scope to keep history.",
+            "Capture-only: requests stream in live, but the list resets on navigation. Click to keep history.",
         };
 
   const doExport = (kind: "json" | "csv") => {
@@ -92,51 +95,67 @@ export function Header({
             <circle cx="20" cy="7" r="1.6" fill="currentColor" />
           </svg>
         </span>
-        <div className="header-title">
-          <span className="title-text">Network Decoder</span>
-          <span className="title-meta">
-            <span className={`status-pill ${status.tone}`} title={status.title}>
-              <span className="status-pill-dot" />
-              {status.label}
+        <span className="title-text">Network Decoder</span>
+
+        <div className="menu-wrap">
+          <button
+            type="button"
+            className={`status-pill ${status.tone}`}
+            onClick={() => setRecordOpen((v) => !v)}
+            aria-expanded={recordOpen}
+            aria-haspopup="menu"
+            title={status.title}
+          >
+            <span className="status-pill-dot" />
+            {status.label}
+            <span className="status-pill-count num">
+              {count}
             </span>
-            <span className="title-count num">
-              {count} request{count === 1 ? "" : "s"}
-            </span>
-          </span>
+            <ChevronDown size={10} className="status-pill-caret" />
+          </button>
+
+          {recordOpen && (
+            <>
+              <div className="menu-backdrop" onClick={() => setRecordOpen(false)} />
+              <div className="menu record-menu" role="menu" aria-label="Recording scope">
+                <div className="menu-label">Recording</div>
+                <div className="record-menu-row">
+                  <div className="record-menu-text">
+                    <div className="record-menu-title">This tab</div>
+                    <div className="record-menu-hint">
+                      Keeps this tab's requests across reloads; switching tabs clears the view.
+                    </div>
+                  </div>
+                  <Switch
+                    checked={recordThisTab}
+                    onChange={(v) => onSetRecordScope(v, recordAllTabs)}
+                    label="Record this tab"
+                  />
+                </div>
+                <div className="record-menu-row">
+                  <div className="record-menu-text">
+                    <div className="record-menu-title">All tabs</div>
+                    <div className="record-menu-hint">
+                      Keeps requests from every tab and site until cleared.
+                    </div>
+                  </div>
+                  <Switch
+                    checked={recordAllTabs}
+                    onChange={(v) => onSetRecordScope(recordThisTab, v)}
+                    label="Record all tabs"
+                  />
+                </div>
+                <div className="record-menu-footnote">
+                  Scopes can be combined. Both off = capture-only: the list
+                  resets on navigation.
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
       <div className="header-actions">
-        <span className="record-label">Record</span>
-        <div className="record-scope" role="group" aria-label="Recording scope">
-          <button
-            type="button"
-            className={`record-toggle ${recordThisTab ? "on" : ""}`}
-            onClick={() => onSetRecordScope(!recordThisTab, recordAllTabs)}
-            aria-pressed={recordThisTab}
-            title={
-              recordThisTab
-                ? "Recording this tab: requests from this tab are kept while you browse here. Switching to another tab clears the view."
-                : "Click to keep this tab's history across reloads. Right now (off) capture-only is active: the list resets on every navigation."
-            }
-          >
-            This tab
-          </button>
-          <button
-            type="button"
-            className={`record-toggle ${recordAllTabs ? "on" : ""}`}
-            onClick={() => onSetRecordScope(recordThisTab, !recordAllTabs)}
-            aria-pressed={recordAllTabs}
-            title={
-              recordAllTabs
-                ? "Recording all tabs: requests from every tab and site are kept until you clear them. Nothing resets on navigation."
-                : "Click to keep requests from every tab and site. Right now (off) capture-only is active: the list resets on every navigation."
-            }
-          >
-            All tabs
-          </button>
-        </div>
-
         <button
           type="button"
           className="icon-btn"
