@@ -89,13 +89,18 @@ export const TikTokParser: MarketingParser = {
     const url = safeUrl(request.url);
     if (!url) return false;
     if (url.hostname === "analytics.tiktok.com" || url.hostname.endsWith(".analytics.tiktok.com")) {
-      if (url.pathname.startsWith("/api/v2/pixel/")) return true;
-      if (url.pathname.startsWith("/i18n/pixel/")) return true;
+      // The bare path (no trailing slash) is the common POST target.
+      if (url.pathname.startsWith("/api/v2/pixel")) return true;
+      if (url.pathname.startsWith("/i18n/pixel")) return true;
     }
     if (
       url.hostname === "business-api.tiktok.com" &&
       (url.pathname.includes("/pixel/track") || url.pathname.includes("/pixel/batch"))
     ) {
+      return true;
+    }
+    // IPv6 enrichment and other tiktokw.us endpoints (web pixel infra).
+    if (url.hostname === "tiktokw.us" || url.hostname.endsWith(".tiktokw.us")) {
       return true;
     }
     return false;
@@ -104,19 +109,28 @@ export const TikTokParser: MarketingParser = {
   parse(request: RawRequest): DecodedEvent {
     const url = safeUrl(request.url);
     const q = request.queryParams;
-    const isServerSide =
-      url?.hostname === "business-api.tiktok.com" ||
-      (request.method === "POST" && isPlainObject(request.body));
+    const isServerSide = url?.hostname === "business-api.tiktok.com";
 
     if (isServerSide) return parseServerSide(request);
 
-    // Client-side pixel: query string or JSON body carrying event info.
+    // The web pixel POSTs a form-encoded `data` parameter whose value is a
+    // JSON array of events: data=[{"event":"Pageview","properties":{…}}].
+    // Unwrap that envelope before reading event fields.
     const body = isPlainObject(request.body) ? request.body : undefined;
-    const eventName = stringValue(
-      (body?.event as string | undefined) ?? q.event
-    ) || "unknown";
+    let eventObj: Record<string, unknown> | undefined;
+    if (body && typeof body.data === "string") {
+      const parsed = tryJsonParse(body.data);
+      if (Array.isArray(parsed)) eventObj = parsed.find(isPlainObject);
+      else if (isPlainObject(parsed)) eventObj = parsed;
+    }
+    const event = eventObj ?? body;
+
+    const eventName =
+      stringValue((event?.event as string | undefined) ?? q.event) ||
+      eventNameFromPath(url) ||
+      "unknown";
     const pixelCode = stringValue(
-      (body?.pixel_code as string | undefined) ?? q.pixel_code ?? q.pixelCode
+      ((event?.pixel_code as string | undefined) ?? q.pixel_code ?? q.pixelCode)
     );
 
     const standard: Parameter[] = [];
@@ -124,15 +138,19 @@ export const TikTokParser: MarketingParser = {
     const context: Parameter[] = [];
     let contents: unknown;
 
-    // Properties arrive as a JSON body field or, on GET beacons, as a JSON
-    // query parameter (e.g. analytics.tiktok.com/api/v2/pixel/?properties=...).
+    // Properties arrive inside the unwrapped event, as a JSON body field,
+    // or on GET beacons as a JSON query parameter.
     let properties: Record<string, unknown> = {};
-    if (body?.properties !== undefined) {
-      const props = body.properties;
-      if (isPlainObject(props)) properties = props;
-    } else {
-      const propsRaw = stringValue(q.properties);
-      const parsed = propsRaw ? tryJsonParse(propsRaw) : undefined;
+    const propsSource =
+      event?.properties !== undefined
+        ? event.properties
+        : body?.properties !== undefined
+          ? body.properties
+          : stringValue(q.properties);
+    if (isPlainObject(propsSource)) {
+      properties = propsSource;
+    } else if (typeof propsSource === "string" && propsSource) {
+      const parsed = tryJsonParse(propsSource);
       if (isPlainObject(parsed)) properties = parsed;
     }
 
@@ -148,20 +166,20 @@ export const TikTokParser: MarketingParser = {
       else custom.push(param);
     }
 
-    if (body) {
-      const page = isPlainObject(body.page) ? body.page : {};
+    if (event) {
+      const page = isPlainObject(event.page) ? event.page : {};
       for (const [key, value] of Object.entries(page)) {
         context.push(makeParam("tiktok", key, value, "context"));
       }
-      const user = isPlainObject(body.user) ? body.user : {};
+      const user = isPlainObject(event.user) ? event.user : {};
       for (const [key, value] of Object.entries(user)) {
         context.push(makeParam("tiktok", key, value, "context"));
       }
-      const contextObj = isPlainObject(body.context) ? body.context : {};
+      const contextObj = isPlainObject(event.context) ? event.context : {};
       for (const [key, value] of Object.entries(contextObj)) {
         context.push(makeParam("tiktok", key, value, "context"));
       }
-      for (const [key, value] of Object.entries(body)) {
+      for (const [key, value] of Object.entries(event)) {
         if (["event", "event_id", "properties", "user", "page", "context", "pixel_code"].includes(key)) continue;
         context.push(makeParam("tiktok", key, value, "context"));
       }
@@ -208,13 +226,25 @@ export const TikTokParser: MarketingParser = {
       contextParameters: context,
       ecommerce,
       meta: {
-        pixelId: pixelCode,
-        eventId: stringValue(q.event_id),
+        pixelId: pixelCode || undefined,
+        eventId:
+          stringValue(q.event_id) ||
+          (typeof event?.event_id === "string" ? event.event_id : "") ||
+          undefined,
         protocol: "TikTok Pixel",
       },
     };
   },
 };
+
+/** Infrastructure pings (e.g. /ipv6/enrich_ipv6) carry no event name —
+ * derive one from the last meaningful path segment. */
+function eventNameFromPath(url: URL | undefined): string {
+  if (!url) return "";
+  const seg = url.pathname.split("/").filter(Boolean).pop();
+  if (!seg || /^(api|v\d+|pixel|ipv6|enrich)$/i.test(seg)) return "";
+  return seg;
+}
 
 function parseServerSide(request: RawRequest): DecodedEvent {
   const body = isPlainObject(request.body) ? request.body : {};

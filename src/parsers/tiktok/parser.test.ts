@@ -11,6 +11,18 @@ describe("TikTokParser.canParse", () => {
     expect(TikTokParser.canParse(r)).toBe(true);
   });
 
+  it("accepts the bare /api/v2/pixel path (POST target, no trailing slash)", () => {
+    const r = rawRequest("https://analytics.tiktok.com/api/v2/pixel", {
+      method: "POST",
+    });
+    expect(TikTokParser.canParse(r)).toBe(true);
+  });
+
+  it("accepts tiktokw.us infrastructure endpoints", () => {
+    const r = rawRequest("https://analytics-ipv6.tiktokw.us/ipv6/enrich_ipv6");
+    expect(TikTokParser.canParse(r)).toBe(true);
+  });
+
   it("accepts server-side business-api requests", () => {
     const r = rawRequest("https://business-api.tiktok.com/open_api/v1.3/pixel/track/", {
       method: "POST",
@@ -99,5 +111,62 @@ describe("TikTokParser.parse — server-side", () => {
     expect(d.ecommerce!.value).toBe(55);
     expect(d.ecommerce!.items[0]!.item_id).toBe("p1");
     expect(d.ecommerce!.transaction_id).toBe("O-42");
+  });
+});
+describe("TikTokParser.parse — web pixel data envelope", () => {
+  it("unwraps the form-encoded data array and decodes the event", () => {
+    const events = JSON.stringify([
+      {
+        event: "Pageview",
+        event_id: "tt-evt-1",
+        properties: { page_url: "https://site.com/", screen_height: 900 },
+      },
+    ]);
+    const bodyText = `data=${encodeURIComponent(events)}`;
+    const r = rawRequest("https://analytics.tiktok.com/api/v2/pixel", {
+      method: "POST",
+      body: queryParams(bodyText),
+      bodyText,
+    });
+    const d = TikTokParser.parse(r);
+
+    expect(d.platform).toBe("tiktok");
+    expect(d.eventName).toBe("Pageview");
+    expect(d.meta.eventId).toBe("tt-evt-1");
+    expect(
+      d.contextParameters.some((p) => p.key === "page_url")
+    ).toBe(true);
+  });
+
+  it("decodes ecommerce properties from the envelope", () => {
+    const events = JSON.stringify([
+      {
+        event: "CompletePayment",
+        properties: {
+          currency: "USD",
+          value: 42.5,
+          contents: [{ content_id: "p1", quantity: 2 }],
+        },
+      },
+    ]);
+    const bodyText = `data=${encodeURIComponent(events)}`;
+    const r = rawRequest("https://analytics.tiktok.com/api/v2/pixel", {
+      method: "POST",
+      body: queryParams(bodyText),
+      bodyText,
+    });
+    const d = TikTokParser.parse(r);
+
+    expect(d.eventName).toBe("CompletePayment");
+    expect(d.ecommerce!.value).toBe(42.5);
+    expect(d.ecommerce!.items[0]!.item_id).toBe("p1");
+  });
+
+  it("names infrastructure pings from the path", () => {
+    const r = rawRequest("https://analytics-ipv6.tiktokw.us/ipv6/enrich_ipv6");
+    const d = TikTokParser.parse(r);
+
+    expect(d.platform).toBe("tiktok");
+    expect(d.eventName).toBe("enrich_ipv6");
   });
 });
