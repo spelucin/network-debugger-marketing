@@ -1,5 +1,6 @@
 import type { RawRequest } from "../core/types";
 import { Ga4Parser } from "./ga4/parser";
+import { UniversalAnalyticsParser } from "./universal-analytics/parser";
 import { GoogleAdsParser } from "./google-ads/parser";
 import { MetaParser } from "./meta/parser";
 import { TikTokParser } from "./tiktok/parser";
@@ -18,6 +19,7 @@ import { TwitterParser } from "./twitter/parser";
 import type { MarketingParser } from "./types";
 
 export const PARSERS: MarketingParser[] = [
+  UniversalAnalyticsParser,
   Ga4Parser,
   GoogleAdsParser,
   MetaParser,
@@ -37,6 +39,7 @@ export const PARSERS: MarketingParser[] = [
 ];
 
 export {
+  UniversalAnalyticsParser,
   Ga4Parser,
   GoogleAdsParser,
   MetaParser,

@@ -1,6 +1,6 @@
 {
   "name": "network-debugger-marketing",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "private": true,
   "type": "module",
   "description": "Network Decoder. Decodes GA4, Meta, TikTok and more marketing requests live in your sidebar.",

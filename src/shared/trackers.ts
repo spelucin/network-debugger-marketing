@@ -19,9 +19,31 @@ interface BeaconRule {
   hostSuffix?: string;
   /** When set, at least one prefix must match the URL path. */
   pathPrefixes?: string[];
+  /** Optional payload-level refinement, checked only after host and path
+   * matched. Lets one path split between two platforms (e.g. /j/collect
+   * serving both Universal Analytics v=1 and GA4 v=2 pings). */
+  refine?: (url: URL) => boolean;
 }
 
 const BEACON_RULES: ReadonlyArray<BeaconRule> = [
+  // ── Universal Analytics (legacy, sunset) ─────────────────────────────────
+  // v=1 Measurement Protocol pings share hosts — and the /j/collect path —
+  // with GA4, so these rules sit before the broad ga4 ones below and refine
+  // on the payload: v=1 or a UA-… tracking id. Anything else (v=2, G-…)
+  // falls through to the ga4 rules.
+  {
+    platform: "universal_analytics",
+    hostSuffix: "google-analytics.com",
+    pathPrefixes: ["/collect", "/j/collect", "/r/collect", "/batch"],
+    refine: isUaPayload,
+  },
+  {
+    platform: "universal_analytics",
+    hostSuffix: "analytics.google.com",
+    pathPrefixes: ["/collect", "/j/collect", "/r/collect", "/batch"],
+    refine: isUaPayload,
+  },
+
   // ── Google Analytics 4 ────────────────────────────────────────────────────
   { platform: "ga4", hostSuffix: "google-analytics.com" },
   { platform: "ga4", hostSuffix: "analytics.google.com" },
@@ -214,6 +236,14 @@ for (const rule of BEACON_RULES) {
   else RULES_BY_APEX.set(apex, [rule]);
 }
 
+/** Universal Analytics payload signature: protocol version 1 or a UA-… id. */
+function isUaPayload(url: URL): boolean {
+  return (
+    url.searchParams.get("v") === "1" ||
+    /^UA-\d+-\d+$/i.test(url.searchParams.get("tid") ?? "")
+  );
+}
+
 function matchesRule(url: URL, rule: BeaconRule): boolean {
   const host = url.hostname.toLowerCase();
   const suffix = rule.hostSuffix;
@@ -221,9 +251,11 @@ function matchesRule(url: URL, rule: BeaconRule): boolean {
     if (host !== suffix && !host.endsWith(`.${suffix}`)) return false;
   }
   if (!rule.pathPrefixes) return suffix !== undefined;
-  return rule.pathPrefixes.some(
+  const pathMatched = rule.pathPrefixes.some(
     (prefix) => url.pathname === prefix || url.pathname.startsWith(prefix)
   );
+  if (!pathMatched) return false;
+  return rule.refine === undefined || rule.refine(url);
 }
 
 function findBeaconRule(rawUrl: string): BeaconRule | null {

@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import {
   ChevronDown,
   Download,
+  Info,
   RotateCw,
   Settings,
   Trash2,
@@ -21,6 +22,7 @@ interface Props {
   onSetRecordScope: (thisTab: boolean, allTabs: boolean) => void;
   onClear: () => void;
   onOpenSettings: () => void;
+  onOpenAbout: () => void;
   onRefreshTab: () => void;
 }
 
@@ -35,6 +37,7 @@ export function Header({
   onSetRecordScope,
   onClear,
   onOpenSettings,
+  onOpenAbout,
   onRefreshTab,
 }: Props) {
   const [exportOpen, setExportOpen] = useState(false);
@@ -205,6 +208,16 @@ export function Header({
           aria-label="Clear captured requests"
         >
           <Trash2 size={15} />
+        </button>
+
+        <button
+          type="button"
+          className="icon-btn"
+          onClick={onOpenAbout}
+          title="About Network Decoder"
+          aria-label="About Network Decoder"
+        >
+          <Info size={15} />
         </button>
 
         <button

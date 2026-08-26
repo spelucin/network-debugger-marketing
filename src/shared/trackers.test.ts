@@ -78,6 +78,24 @@ describe("new-platform beacon rules", () => {
     expect(classifyBeacon("https://stats.g.doubleclick.net/j/collect?v=1")).toBe("google_ads");
   });
 
+  it("splits google-analytics.com /j/collect by payload between UA and GA4", () => {
+    expect(
+      classifyBeacon("https://www.google-analytics.com/j/collect?v=1&t=pageview&tid=UA-29179243-2")
+    ).toBe("universal_analytics");
+    expect(
+      classifyBeacon("https://www.google-analytics.com/collect?v=1&tid=UA-29179243-2")
+    ).toBe("universal_analytics");
+    expect(
+      classifyBeacon("https://www.google-analytics.com/batch?v=1&tid=UA-29179243-2")
+    ).toBe("universal_analytics");
+    expect(
+      classifyBeacon("https://www.google-analytics.com/j/collect?v=2&tid=G-ABC&en=page_view")
+    ).toBe("ga4");
+    expect(
+      classifyBeacon("https://www.google-analytics.com/g/collect?v=2&tid=G-ABC&en=page_view")
+    ).toBe("ga4");
+  });
+
   it("does not treat lookalike paths on unrelated domains as beacons", () => {
     expect(looksTracked("https://example.com/en/matomo-guide")).toBe(false);
     expect(looksTracked("https://example.com/downloads/piwik.php.backup")).toBe(false);

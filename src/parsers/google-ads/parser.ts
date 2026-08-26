@@ -15,22 +15,33 @@ function safeUrl(url: string): URL | undefined {
   }
 }
 
+function hostMatches(host: string, suffix: string): boolean {
+  return host === suffix || host.endsWith(`.${suffix}`);
+}
+
 function isAdsHost(host: string): boolean {
-  if (
-    host === "doubleclick.net" ||
-    host.endsWith(".doubleclick.net") ||
-    host === "googleadservices.com" ||
-    host.endsWith(".googleadservices.com") ||
+  return (
+    hostMatches(host, "doubleclick.net") ||
+    hostMatches(host, "googleadservices.com") ||
+    hostMatches(host, "adservice.google.com") ||
+    hostMatches(host, "googlesyndication.com") ||
+    hostMatches(host, "adtrafficquality.google") ||
+    hostMatches(host, "google.com")
+  );
+}
+
+/** Hosts that exist solely for ads measurement/infrastructure: any path on
+ * them is an ads signal. Generic doubleclick.net still requires /pagead/ —
+ * it also serves creatives — and google.com keeps the same restriction. */
+function isAdsAnyPathHost(host: string): boolean {
+  return (
+    hostMatches(host, "googleadservices.com") ||
+    hostMatches(host, "googlesyndication.com") ||
+    hostMatches(host, "adtrafficquality.google") ||
     host === "adservice.google.com" ||
-    host.endsWith(".adservice.google.com")
-  ) {
-    return true;
-  }
-  if (host === "google.com" || host.endsWith(".google.com")) {
-    // Only pagead paths count; www.google.com/pagead is a real conversion host.
-    return true;
-  }
-  return false;
+    host === "cm.g.doubleclick.net" ||
+    host === "googleads.g.doubleclick.net"
+  );
 }
 
 function stringValue(raw: string | string[] | undefined): string {
@@ -52,6 +63,7 @@ export const GoogleAdsParser: MarketingParser = {
   canParse(request: RawRequest): boolean {
     const url = safeUrl(request.url);
     if (!url) return false;
+    if (isAdsAnyPathHost(url.hostname)) return true;
     if (isAdsHost(url.hostname) && url.pathname.startsWith("/pagead/")) {
       return true;
     }
@@ -94,6 +106,15 @@ export const GoogleAdsParser: MarketingParser = {
     else if (path.includes("interaction")) eventName = "conversion_linker";
     else if (path.includes("landing")) eventName = "landing";
     else if (path === "/gtag/destination") eventName = "conversion";
+    else if (/\/pixel(\/|$)/.test(path))
+      eventName = path.endsWith("/attr") ? "pixel_attr" : "pixel";
+    else if (path.startsWith("/btr/")) eventName = "btr";
+    else if (path.includes("activeview")) eventName = "active_view";
+    // Google's standard logging endpoints (gen_204 / generate_204).
+    else if (path.includes("gen_204") || path.endsWith("/generate_204"))
+      eventName = "log";
+    else if (path.includes("report-shared-storage")) eventName = "shared_storage_report";
+    else if (path.includes("getconfig")) eventName = "config";
     else eventName = stringValue(q.type) || "conversion";
 
     // Conversion ID may come from aw_id, the data JSON, or the gtag destination id.

@@ -15,7 +15,10 @@ import type {
 } from "../../core/types";
 
 const GA4_HOST_RE = /(^|\.)(google-analytics\.com|analytics\.google\.com)$/;
-const GA4_PATH_RE = /^\/(?:g|mp)\/collect$/;
+// Collect endpoints seen in the wild: /g/collect (web), /mp/collect
+// (Measurement Protocol), /j/collect (some gtag builds), plus doubled-slash
+// variants (//collect) served by misconfigured tag recipes.
+const GA4_PATH_RE = /^\/+(?:(?:g|mp|j)\/)?collect$/;
 
 const EVENT_PREFIXES: Array<{ prefix: string; category: ParamCategory }> = [
   { prefix: "epn.", category: "standard" },

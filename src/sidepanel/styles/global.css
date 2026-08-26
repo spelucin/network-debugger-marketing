@@ -1297,6 +1297,8 @@ select {
   flex-direction: column;
   gap: 10px;
   max-width: 280px;
+  /* .empty-state centers text; steps must stay flush-left against their markers */
+  text-align: left;
 }
 
 .empty-step {
@@ -2174,6 +2176,109 @@ select {
   font-size: 11.5px;
   color: var(--text-2);
   line-height: 1.5;
+}
+
+.about-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+/* About panel — documentation-style sections */
+.about-body {
+  gap: 20px;
+}
+
+.about-section h3 {
+  margin: 0 0 6px;
+  font-size: 12.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.about-section p {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--text-2);
+  line-height: 1.55;
+}
+
+.about-section ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.about-section li {
+  position: relative;
+  padding-left: 13px;
+  font-size: 11.5px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.about-section li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.55em;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.about-section strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.about-section kbd {
+  display: inline-block;
+  padding: 0 4px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-2);
+}
+
+.about-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.about-privacy {
+  margin-top: 10px;
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+
+.about-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 550;
+  transition: border-color 0.12s ease, color 0.12s ease;
+}
+
+.about-link:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
 }
 
 .about-note {

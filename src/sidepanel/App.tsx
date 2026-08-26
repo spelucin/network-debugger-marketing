@@ -5,6 +5,7 @@ import { FilterBar } from "./components/FilterBar";
 import { RequestList, type ListView } from "./components/RequestList";
 import { Detail } from "./components/Detail";
 import { SettingsOverlay } from "./components/SettingsOverlay";
+import { AboutOverlay } from "./components/AboutOverlay";
 import { EmptyState } from "./components/EmptyState";
 import { StatsFooter } from "./components/StatsFooter";
 import { DEFAULT_FILTERS, filterByTab, filterRequests, type FilterState } from "./lib/filters";
@@ -29,6 +30,7 @@ export function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const [navigating, setNavigating] = useState(false);
 
   // Track the active tab's page loads: while a navigation is in flight and
@@ -175,6 +177,7 @@ export function App() {
         onSetRecordScope={setRecordScope}
         onClear={handleClear}
         onOpenSettings={() => setShowSettings(true)}
+        onOpenAbout={() => setShowAbout(true)}
         onRefreshTab={handleRefreshTab}
         activeTabId={activeTabId}
       />
@@ -222,6 +225,8 @@ export function App() {
           onClose={() => setShowSettings(false)}
         />
       )}
+
+      {showAbout && <AboutOverlay onClose={() => setShowAbout(false)} />}
     </div>
   );
 }

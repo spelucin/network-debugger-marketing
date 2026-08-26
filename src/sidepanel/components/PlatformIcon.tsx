@@ -39,12 +39,23 @@ function fromSimpleIcons(si: { hex: string; path: string }): Glyph {
   };
 }
 
+/** A simple-icons glyph drained to a neutral gray — used for sunset
+ * platforms whose artwork should read as retired (Universal Analytics). */
+function grayed(si: { path: string }): Glyph {
+  return {
+    hex: "#9AA0A6",
+    viewBox: "0 0 24 24",
+    body: `<path fill="#9AA0A6" d="${si.path}"/>`,
+  };
+}
+
 function fromMark(mark: PlatformMark): Glyph {
   return { hex: mark.hex, viewBox: mark.viewBox, body: mark.body };
 }
 
 const GLYPHS: Record<Exclude<Platform, "unknown">, Glyph> = {
   ga4: fromSimpleIcons(siGoogleanalytics),
+  universal_analytics: grayed(siGoogleanalytics),
   google_ads: fromSimpleIcons(siGoogleads),
   meta: fromSimpleIcons(siMeta),
   tiktok: fromSimpleIcons(siTiktok),

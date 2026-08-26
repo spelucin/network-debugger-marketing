@@ -10,6 +10,7 @@ import { META_DEFINITION_MAP } from "./meta";
 import { MIXPANEL_DEFINITION_MAP } from "./mixpanel";
 import { PINTEREST_DEFINITION_MAP } from "./pinterest";
 import { TIKTOK_DEFINITION_MAP } from "./tiktok";
+import { UA_DEFINITION_MAP } from "./universal-analytics";
 import { CRITEO_DEFINITION_MAP, CRITEO_DOCS } from "./criteo";
 import { HUBSPOT_DEFINITION_MAP, HUBSPOT_DOCS } from "./hubspot";
 import { LINKEDIN_DEFINITION_MAP, LINKEDIN_DOCS } from "./linkedin";
@@ -24,6 +25,7 @@ export { GA4_DOCS, GOOGLE_ADS_DOCS, META_DOCS, TIKTOK_DOCS } from "./types";
 export { HEAP_DOCS } from "./heap";
 export { MATOMO_DOCS } from "./matomo";
 export { MIXPANEL_DOCS } from "./mixpanel";
+export { UA_DOCS } from "./universal-analytics";
 export { PINTEREST_DOCS } from "./pinterest";
 export { CRITEO_DOCS, HUBSPOT_DOCS, LINKEDIN_DOCS, SNAPCHAT_DOCS, TWITTER_DOCS };
 
@@ -87,6 +89,7 @@ export function getDefinition(
   const name = bareName(platform, key);
   const maps: Record<Platform, Map<string, ParameterDefinition> | undefined> = {
     ga4: GA4_DEFINITION_MAP,
+    universal_analytics: UA_DEFINITION_MAP,
     google_ads: GOOGLE_ADS_DEFINITION_MAP,
     meta: META_DEFINITION_MAP,
     tiktok: TIKTOK_DEFINITION_MAP,

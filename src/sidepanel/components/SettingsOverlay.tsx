@@ -1,10 +1,7 @@
 import { X } from "lucide-react";
 import type { CaptureSettings } from "../../core/types";
-import { watchDomains } from "../../shared/watch-urls";
 import { Switch } from "./Switch";
 import { Segmented } from "./Segmented";
-
-const WATCH_DOMAINS = watchDomains();
 
 interface Props {
   settings: CaptureSettings;
@@ -87,18 +84,6 @@ export function SettingsOverlay({ settings, onUpdate, onClose }: Props) {
 
           <div className="settings-divider" />
 
-          <Setting label="Watched domains" hint="Only these hosts are observed. No other traffic is read.">
-            <div className="domain-list">
-              {WATCH_DOMAINS.map((d) => (
-                <span key={d} className="domain-chip">
-                  {d}
-                </span>
-              ))}
-            </div>
-          </Setting>
-
-          <div className="settings-divider" />
-
           <div className="privacy-note">
             <div className="privacy-title">Privacy</div>
             <p>
@@ -107,8 +92,7 @@ export function SettingsOverlay({ settings, onUpdate, onClose }: Props) {
             </p>
             <p>
               Parsing and decoding all run locally. Requests are read only from
-              the marketing domains listed above, and only while capture is
-              enabled.
+              those marketing endpoints, and only while capture is enabled.
             </p>
           </div>
 

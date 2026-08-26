@@ -18,6 +18,16 @@ describe("Ga4Parser.canParse", () => {
     expect(Ga4Parser.canParse(r)).toBe(true);
   });
 
+  it("accepts /j/collect", () => {
+    const r = G("/j/collect", "v=2&tid=G-ABC123&en=page_view");
+    expect(Ga4Parser.canParse(r)).toBe(true);
+  });
+
+  it("accepts doubled-slash collect paths", () => {
+    const r = G("//collect", "v=2&tid=G-ABC123&en=page_view");
+    expect(Ga4Parser.canParse(r)).toBe(true);
+  });
+
   it("rejects non-GA4 hosts", () => {
     const r = rawRequest("https://example.com/g/collect?tid=G-ABC123&en=page_view", {
       queryParams: queryParams("tid=G-ABC123&en=page_view"),

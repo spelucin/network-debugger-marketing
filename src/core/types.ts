@@ -2,6 +2,7 @@
 
 export type Platform =
   | "ga4"
+  | "universal_analytics"
   | "google_ads"
   | "meta"
   | "tiktok"
@@ -29,6 +30,7 @@ export type Platform =
 
 export const PLATFORMS: readonly Platform[] = [
   "ga4",
+  "universal_analytics",
   "google_ads",
   "meta",
   "tiktok",
@@ -63,6 +65,11 @@ export interface PlatformInfo {
 
 export const PLATFORM_INFO: Record<Platform, PlatformInfo> = {
   ga4: { id: "ga4", label: "Google Analytics 4", shortLabel: "GA4" },
+  universal_analytics: {
+    id: "universal_analytics",
+    label: "Universal Analytics",
+    shortLabel: "UA",
+  },
   google_ads: { id: "google_ads", label: "Google Ads", shortLabel: "ADS" },
   meta: { id: "meta", label: "Meta", shortLabel: "META" },
   tiktok: { id: "tiktok", label: "TikTok", shortLabel: "TIKTOK" },

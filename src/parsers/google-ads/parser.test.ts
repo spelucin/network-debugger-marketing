@@ -70,6 +70,44 @@ describe("GoogleAdsParser.canParse", () => {
       )
     ).toBe(true);
   });
+
+  it("accepts any path on ads-only hosts", () => {
+    expect(
+      GoogleAdsParser.canParse(req("https://cm.g.doubleclick.net/pixel?google_ia=1"))
+    ).toBe(true);
+    expect(
+      GoogleAdsParser.canParse(
+        req("https://cm.g.doubleclick.net/pixel/attr?google_ia=1")
+      )
+    ).toBe(true);
+    expect(
+      GoogleAdsParser.canParse(req("https://googleads.g.doubleclick.net/btr/view?v=1"))
+    ).toBe(true);
+    expect(
+      GoogleAdsParser.canParse(
+        req("https://www.googleadservices.com/report-shared-storage?a=1")
+      )
+    ).toBe(true);
+    expect(
+      GoogleAdsParser.canParse(
+        req("https://ep1.adtrafficquality.google/getconfig/sodar?sv=1")
+      )
+    ).toBe(true);
+    expect(
+      GoogleAdsParser.canParse(req("https://ep2.adtrafficquality.google/generate_204"))
+    ).toBe(true);
+    expect(
+      GoogleAdsParser.canParse(
+        req("https://pagead2.googlesyndication.com/ufs_web_display.js")
+      )
+    ).toBe(true);
+  });
+
+  it("still requires /pagead/ on generic doubleclick.net", () => {
+    expect(
+      GoogleAdsParser.canParse(req("https://ad.doubleclick.net/creative/banner.jpg"))
+    ).toBe(false);
+  });
 });
 
 describe("GoogleAdsParser.parse", () => {
@@ -123,5 +161,47 @@ describe("GoogleAdsParser.parse", () => {
 
     expect(d.meta.conversionId).toBe("AW-111222333");
     expect(d.standardParameters.some((p) => p.key === "data.e")).toBe(true);
+  });
+
+  it("names the infrastructure endpoints sensibly", () => {
+    expect(
+      GoogleAdsParser.parse(req("https://cm.g.doubleclick.net/pixel?google_ia=1"))
+        .eventName
+    ).toBe("pixel");
+    expect(
+      GoogleAdsParser.parse(
+        req("https://cm.g.doubleclick.net/pixel/attr?google_ia=1")
+      ).eventName
+    ).toBe("pixel_attr");
+    expect(
+      GoogleAdsParser.parse(
+        req("https://googleads.g.doubleclick.net/btr/view?v=1")
+      ).eventName
+    ).toBe("btr");
+    expect(
+      GoogleAdsParser.parse(
+        req("https://pagead2.googlesyndication.com/pcs/activeview?avi=abc")
+      ).eventName
+    ).toBe("active_view");
+    expect(
+      GoogleAdsParser.parse(
+        req("https://pagead2.googlesyndication.com/pagead/gen_204?id=1")
+      ).eventName
+    ).toBe("log");
+    expect(
+      GoogleAdsParser.parse(
+        req("https://ep2.adtrafficquality.google/generate_204")
+      ).eventName
+    ).toBe("log");
+    expect(
+      GoogleAdsParser.parse(
+        req("https://www.googleadservices.com/report-shared-storage?a=1")
+      ).eventName
+    ).toBe("shared_storage_report");
+    expect(
+      GoogleAdsParser.parse(
+        req("https://ep1.adtrafficquality.google/getconfig/sodar?sv=1")
+      ).eventName
+    ).toBe("config");
   });
 });
